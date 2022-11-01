@@ -7,7 +7,7 @@ import router from "./router";
 
 import "./assets/main.css";
 
-axios.defaults.baseURL = "localhost://8080";
+axios.defaults.baseURL = "http://localhost:3000/";
 const app = createApp(App);
 
 app.use(createPinia());

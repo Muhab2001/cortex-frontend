@@ -22,6 +22,16 @@ const router = createRouter({
       name: "home",
       component: () => import("@/views/HomeView.vue"),
     },
+    {
+      path: "/grade",
+      name: "grade",
+      component: () => import("@/views/GradeView.vue"),
+    },
+    {
+      path: "/assignment",
+      name: "assignment",
+      component: () => import("@/views/AssignmentView.vue"),
+    },
   ],
 });
 
