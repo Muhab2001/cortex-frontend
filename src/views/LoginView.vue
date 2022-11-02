@@ -24,13 +24,14 @@ interface LoggingModel {
 // state
 const model = ref<LoggingModel>({
   username: null,
+
   password: null,
 });
 
 const rules: FormRules = {
   username: {
     required: true,
-    message: "Please enter your username",
+    message: "Please enter your clown name",
     trigger: ["blur"],
   },
   password: {
@@ -70,14 +71,14 @@ const submitForm = () => {
 
 <template>
   <main
-    class="t-w-[100vw] t-flex t-flex-col t-items-center t-justify-center t-h-full t-px-[12vw]"
+    class="t-w-[100vw] t-flex t-flex-col t-items-center t-justify-center t-h-full"
   >
     <header class="t-flex-col t-items-center t-text-center">
       <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">Cortex</h1>
       <p class="t-mb-10">New Era of premium learning experience</p>
     </header>
     <NForm
-      class="sm:t-w-full md:t-w-72 lg:t-w-80"
+      class="t-w-[90vw] md:t-w-72 lg:t-w-80"
       ref="formRef"
       :label-width="80"
       :model="model"
@@ -99,11 +100,9 @@ const submitForm = () => {
       </NFormItem>
       <NButton
         @click="submitForm"
-        class="t-w-full hover:t-bg-green-500 hover:t-text-white"
+        class="t-w-full hover:t-bg-green-500 hover:t-text-white t-mt-10"
         >Login</NButton
       >
     </NForm>
   </main>
 </template>
-
-<style></style>

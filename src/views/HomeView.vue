@@ -1,11 +1,15 @@
-<script setup lang="ts">
-import TheWelcome from "../components/TheWelcome.vue";
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <main>
-    <div class="text-red-500">Hello!!!</div>
-    <TheWelcome />
+    <!-- header, user info,  -->
+    <header></header>
+    <!-- section cards -->
+    <section></section>
+    <!-- announcements and deadline -->
+    <aside>
+      <section></section>
+      <section></section>
+    </aside>
   </main>
 </template>
