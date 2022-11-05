@@ -11,10 +11,13 @@ import {
   type FormRules,
 } from "naive-ui";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 // UI framwork logic
 const formRef = ref<FormInst | null>(null);
 const messenger = useMessage();
+// router
+const router = useRouter();
 
 // interfaces
 interface LoggingModel {
@@ -50,6 +53,7 @@ const submitForm = () => {
     async (errors: Array<FormValidationError> | undefined) => {
       if (!errors) {
         try {
+          router.push("/home");
           console.log(
             await axios.post("/login", {
               username: model.value.username,
