@@ -8,12 +8,13 @@
         :src="props.photoUrl"
       />
     </span>
-    <span class="t-mx-3 t-hidden md:t-flex">{{ props.username }}</span>
+    <span class="t-mx-3 t-hidden md:t-flex t-font-bold">{{
+      props.username
+    }}</span>
   </div>
 </template>
 <script setup lang="ts">
-import { NAvatar, NCard } from "naive-ui";
-import type { User } from "typings/globals";
+import { NAvatar } from "naive-ui";
 
 const props = defineProps<{
   username: string;

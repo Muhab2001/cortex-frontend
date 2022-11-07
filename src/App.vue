@@ -8,7 +8,7 @@ const theme = useTheme();
 
 <template>
   <NConfigProvider
-    style="width: 100vw; height: 100vh; margin: 0"
+    style="width: 100%; height: 100vh; margin: 0"
     :theme="theme.getTheme()"
   >
     <NMessageProvider style="width: 100vw; height: 100vh">
