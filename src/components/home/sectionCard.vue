@@ -3,7 +3,7 @@ import { NAvatar, NCard, NTooltip } from "naive-ui";
 
 interface SectionCardProps {
   courseName: string;
-  sectionNum: number;
+  sectionNum: number | string;
   courseId: string;
   coverUrl: string;
   instructorImgUrl: string;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DeadlineCard from "@/components/home/deadlineCard.vue";
 import SectionCard from "@/components/home/sectionCard.vue";
 import ProfileCard from "@/components/utils/profileCard.vue";
 import { NBreadcrumb, NBreadcrumbItem } from "naive-ui";
@@ -55,7 +56,7 @@ import { NBreadcrumb, NBreadcrumbItem } from "naive-ui";
               course-id="SWE363"
               course-name="Web Engineering & Development"
               cover-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
-              :section-num="5"
+              :section-num="26"
               instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
             />
           </div>
@@ -89,7 +90,16 @@ import { NBreadcrumb, NBreadcrumbItem } from "naive-ui";
                 Deadlines
               </h3>
             </div>
-            <div class="md:t-columns-1"></div>
+            <div class="md:t-columns-1">
+              <DeadlineCard
+                course-id="SWE363"
+                course-name="Web Engineeering"
+                :deadline="new Date('2022-11-10T23:15:00')"
+                :original-date="new Date('2022-11-08T10:00:00')"
+                title="Project Phase 3"
+                section-no="Common"
+              />
+            </div>
           </section>
         </aside>
       </div>
