@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { NAvatar, NCard, NTooltip } from "naive-ui";
+import { useAuth } from "@/stores/auth";
+import { NAvatar, NCard, NEllipsis, NTooltip } from "naive-ui";
+import { useRouter } from "vue-router";
 
 interface SectionCardProps {
   courseName: string;
@@ -7,31 +9,35 @@ interface SectionCardProps {
   courseId: string;
   coverUrl: string;
   instructorImgUrl: string;
+  clickable: boolean;
 }
 
 const props = defineProps<SectionCardProps>();
+const auth = useAuth();
+const router = useRouter();
 </script>
 
 <template>
   <NCard
-    class="t-rounded-lg t-mb-3 t-cursor-pointer"
+    class="t-rounded-lg t-mb-3 t-cursor-pointer t-border-solid t-border-[2px]"
     content-style="width: 100%; padding: 0px; height: 300px"
+    @click="router.push('/course/2')"
     hoverable
   >
     <img
-      class="t-w-full t-rounded-lg t-h-[200px]"
+      class="t-hidden md:t-flex t-w-full t-rounded-lg t-h-[200px]"
       :src="props.coverUrl"
       :alt="courseName + ' Section cover'"
     />
     <div class="t-px-4 t-flex t-justify-between t-w-full t-items-center">
-      <div class="t-w-fit t-py-2">
+      <div class="t-w-fit t-py-2 title-container">
         <div>
           <span class="t-font-bold t-mr-2 t-text-lg">{{ props.courseId }}</span>
           <span
             ><NTooltip trigger="hover" placement="bottom">
               <template #trigger>
                 <span
-                  class="t-text-md t-font-semibold t-bg-blue-200 t-py-[0.175rem] t-px-2 t-rounded-md t-text-blue-600"
+                  class="t-text-sm t-font-medium t-bg-blue-200 t-py-[0.1rem] t-px-2 t-rounded-md t-text-blue-600"
                   >{{ props.sectionNum }}</span
                 >
               </template>
@@ -39,11 +45,23 @@ const props = defineProps<SectionCardProps>();
             </NTooltip></span
           >
         </div>
-        <span>{{ props.courseName }}</span>
+        <NEllipsis :line-clamp="1">{{ props.courseName }}</NEllipsis>
       </div>
       <NAvatar round :src="props.instructorImgUrl" />
     </div>
   </NCard>
 </template>
 
-<style></style>
+<style>
+.title-container::before {
+  content: "";
+  margin: auto;
+  border-radius: 1.5px;
+  height: 60% !important;
+  width: 3px !important;
+  background-color: rgb(116, 215, 255);
+  position: absolute;
+  left: -9px;
+  top: 14px;
+}
+</style>

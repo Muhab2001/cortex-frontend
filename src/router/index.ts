@@ -8,11 +8,19 @@ const router = createRouter({
       path: "/",
       name: "login",
       component: LoginView,
+      props: { header: false },
     },
     {
       path: "/home",
       name: "home",
       component: () => import("@/views/HomeView.vue"),
+      props: { header: true },
+    },
+    {
+      path: "/course/:role",
+      name: "course",
+      component: () => import("@/views/course/CourseView.vue"),
+      props: { header: true },
     },
     {
       path: "/grade",

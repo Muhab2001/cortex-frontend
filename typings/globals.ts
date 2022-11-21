@@ -4,6 +4,6 @@ export interface User {
   role: Role;
 }
 export enum Role {
-  STUDENT = 0,
-  INSTRUCTOR = 1,
+  STUDENT = 1,
+  INSTRUCTOR = 2,
 }

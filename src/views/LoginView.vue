@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useAuth } from "@/stores/auth";
+import { useBreadCrumb } from "@/stores/breadcrump";
 import axios from "axios";
 import {
   type FormValidationError,
@@ -18,6 +20,16 @@ const formRef = ref<FormInst | null>(null);
 const messenger = useMessage();
 // router
 const router = useRouter();
+// authentication store
+const auth = useAuth();
+const breadCrumb = useBreadCrumb();
+
+breadCrumb.updateOptions([
+  {
+    label: "",
+    path: "/",
+  },
+]);
 
 // interfaces
 interface LoggingModel {
@@ -54,12 +66,13 @@ const submitForm = () => {
       if (!errors) {
         try {
           router.push("/home");
-          console.log(
-            await axios.post("/login", {
-              username: model.value.username,
-              password: model.value.password,
-            })
-          );
+          // console.log(
+          //   await axios.post("/login", {
+          //     username: model.value.username,
+          //     password: model.value.password,
+          //   })
+          // );
+          auth.signIn(model.value.username!, model.value.password!);
           messenger.success("Successful sign in!");
         } catch (e: any) {
           messenger.error("Login Failed!");
@@ -75,7 +88,7 @@ const submitForm = () => {
 
 <template>
   <main
-    class="t-w-[100vw] t-flex t-flex-col t-items-center t-justify-center t-h-full"
+    class="t-w-full t-flex t-flex-col t-items-center t-justify-center t-h-full"
   >
     <header class="t-flex-col t-items-center t-text-center">
       <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">Cortex</h1>

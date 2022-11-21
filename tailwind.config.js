@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /** @type {import('tailwindcss').Config} */
 // eslint-disable-next-line no-undef
 module.exports = {
@@ -5,11 +6,14 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [],
   prefix: "t-",
   darkMode: "class",
   corePlugins: {
     preflight: false,
   },
   important: true,
+  plugins: [
+    require("@tailwindcss/line-clamp"),
+    // ...
+  ],
 };

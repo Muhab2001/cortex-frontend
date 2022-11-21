@@ -1,26 +1,26 @@
 <template>
   <NCard
-    class="t-rounded-md"
+    class="t-rounded-md t-border-solid t-border-[2px] t-cursor-pointer"
     header-style="padding-bottom: 0;"
     hoverable
     size="small"
   >
     <!--  card header -->
     <template #header
-      ><div class="t-flex t-w-full t-justify-between">
+      ><div class="t-flex t-w-full t-justify-between t-flex-wrap">
         <div id="course-info">
-          <div id="course-meta-info">
+          <div id="course-meta-info" class="t-flex t-items-center t-h-fit">
             <span class="t-font-bold t-mr-2 t-text-lg t-text-blue-500">{{
               props.courseId
             }}</span
             ><span
-              class="t-text-sm t-font-semibold t-bg-blue-200 t-py-[0.175rem] t-px-2 t-rounded-md t-text-blue-600"
+              class="t-text-xs t-font-medium t-bg-blue-200 t-py-[0.175rem] t-px-2 t-rounded-md t-text-blue-600"
               >{{ props.sectionNo }}</span
             >
           </div>
-          <span>{{ props.courseName }}</span>
+          <span class="t-text-sm">{{ props.courseName }}</span>
         </div>
-        <span class="t-text-slate-500 t-font-medium">{{
+        <span class="t-text-slate-500 t-font-medium t-text-sm">{{
           props.deadline.toLocaleDateString()
         }}</span>
       </div></template
@@ -115,6 +115,7 @@ const percentageStatus = computed(() => {
 
 const outputString = computed(() => {
   if (milliDiff.value < 0) {
+    clearInterval(counterId.value);
     return "Deadline Expired!";
   }
   let result = "";
