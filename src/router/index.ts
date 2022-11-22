@@ -17,10 +17,10 @@ const router = createRouter({
       props: { header: true },
     },
     {
-      path: "/course/:role",
+      path: "/course/",
       name: "course",
       component: () => import("@/views/course/CourseView.vue"),
-      props: { header: true },
+      props: true,
     },
     {
       path: "/grade",

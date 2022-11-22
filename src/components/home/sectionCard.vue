@@ -6,6 +6,7 @@ import { useRouter } from "vue-router";
 interface SectionCardProps {
   courseName: string;
   sectionNum: number | string;
+  sectionId: number;
   courseId: string;
   coverUrl: string;
   instructorImgUrl: string;
@@ -21,7 +22,17 @@ const router = useRouter();
   <NCard
     class="t-rounded-lg t-mb-3 t-cursor-pointer t-border-solid t-border-[2px]"
     content-style="width: 100%; padding: 0px; height: 300px"
-    @click="router.push('/course/2')"
+    @click="
+      router.push({
+        path: '/course',
+        params: {
+          courseName: props.courseName,
+          courseId: props.courseId,
+          sectionNum: props.sectionNum,
+          sectionId: props.sectionId,
+        },
+      })
+    "
     hoverable
   >
     <img

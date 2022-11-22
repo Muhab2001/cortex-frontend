@@ -2,10 +2,10 @@
 import { Delete24Filled, Edit16Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
 import { NButton, NTag } from "naive-ui";
-import type { AssignmentItem, Editable } from "typings/sectionViewTabs";
+import type { AssignmentItemProps, Editable } from "typings/CourseViewTabs";
 import { ref } from "vue";
 
-const props = defineProps<Editable<AssignmentItem>>();
+const props = defineProps<Editable<AssignmentItemProps>>();
 
 // TODO: supply functions that trigger deletion or editing of content files
 

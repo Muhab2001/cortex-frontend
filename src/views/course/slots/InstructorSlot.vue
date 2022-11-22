@@ -1,25 +1,22 @@
 <template>
-  <template v-if="tab === 'Content'">
+  <template v-if="props.tab === 'Course Content'">
     <div></div>
   </template>
-  <template v-if="tab === 'Assignments'">
+  <template v-if="props.tab === 'Assignments'">
     <div></div>
   </template>
-  <template v-if="tab === 'Grades'">
+  <template v-if="props.tab === 'Grades'">
     <div></div>
   </template>
-  <template v-if="tab === 'Announcements'">
+  <template v-if="props.tab === 'Announcements'">
     <div></div>
   </template>
 </template>
 
 <script setup lang="ts">
-import type { SectionTab } from "typings/sectionViewTabs";
+import type { SectionTabProps } from "typings/CourseViewTabs";
 import { ref } from "vue";
-const tab = ref<SectionTab>("Content");
 
-function switchTab(newIndex: SectionTab) {
-  tab.value = newIndex;
-}
+const props = defineProps<SectionTabProps>();
 </script>
 <style lang=""></style>

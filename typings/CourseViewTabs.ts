@@ -1,3 +1,4 @@
+import type { Component } from "vue";
 import type { Role } from "./globals";
 
 export type SectionTab =
@@ -8,30 +9,33 @@ export type SectionTab =
   | "Announcements";
 
 export interface SectionTabProps {
-  label: SectionTab;
   sectionId: number;
   role: Role;
+  tab: SectionTab;
 }
 
-interface baseItem {
+
+
+interface baseItemProps {
+  id: number;
   title: string;
   description?: string;
   lastUpdated: string;
 }
 
-export interface ContentItem extends baseItem {
-  fileURLs: string[];
+export interface ContentItemProps extends baseItemProps {
+  fileUrls: string[];
 }
 
-export interface GradeItem extends baseItem {
+export interface GradeItem extends baseItemProps {
   score?: number;
 }
 
-export interface AnnouncementItem extends baseItem {
+export interface AnnouncementItemProps extends baseItemProps {
   tag: string;
 }
 
-export interface AssignmentItem extends baseItem {
+export interface AssignmentItemProps extends baseItemProps {
   deadline: string;
   maxPoints: number;
 }

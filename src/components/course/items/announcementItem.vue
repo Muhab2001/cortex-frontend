@@ -2,10 +2,10 @@
 import { Delete24Filled, Edit16Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
 import { NButton, NTag } from "naive-ui";
-import type { AnnouncementItem, Editable } from "typings/sectionViewTabs";
+import type { AnnouncementItemProps, Editable } from "typings/CourseViewTabs";
 import { h, type Component, ref } from "vue";
 
-const props = defineProps<Editable<AnnouncementItem>>();
+const props = defineProps<Editable<AnnouncementItemProps>>();
 
 // TODO: supply functions that trigger deletion or editing of content files
 

@@ -2,10 +2,10 @@
 import { Delete24Filled, Edit16Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
 import { NButton, NTag } from "naive-ui";
-import type { ContentItem, Editable } from "typings/sectionViewTabs";
+import type { ContentItemProps, Editable } from "typings/CourseViewTabs";
 import { h, type Component, ref } from "vue";
 
-const props = defineProps<Editable<ContentItem>>();
+const props = defineProps<Editable<ContentItemProps>>();
 
 const itemFiles = ref<string[]>();
 
