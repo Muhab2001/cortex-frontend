@@ -15,10 +15,10 @@
       <!-- main items -->
       <section class="t-columns-1 t-w-full md:t-w-[70%]">
         <!-- condiitonal rendering for slots (according to user role) -->
-        <template name="instructor-pane">
+        <template v-if="auth.role == 2">
           <InsrtuctorSlot />
         </template>
-        <template name="student-pane">
+        <template v-if="auth.role == 1">
           <div>
             <StudentSlot />
           </div>
@@ -29,6 +29,7 @@
 </template>
 <script setup lang="ts">
 import SectionCard from "@/components/home/sectionCard.vue";
+import { useAuth } from "@/stores/auth";
 interface CoruseProps {
   courseName: string;
   courseID: string;
@@ -37,5 +38,6 @@ interface CoruseProps {
 }
 
 const props = defineProps<CoruseProps>();
+const auth = useAuth();
 </script>
 <style lang=""></style>

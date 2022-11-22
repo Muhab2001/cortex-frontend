@@ -14,10 +14,11 @@
 </template>
 
 <script setup lang="ts">
+import type { SectionTab } from "typings/sectionViewTabs";
 import { ref } from "vue";
-const tab = ref<string>("Content");
+const tab = ref<SectionTab>("Content");
 
-function switchTab(newIndex: string) {
+function switchTab(newIndex: SectionTab) {
   tab.value = newIndex;
 }
 </script>
