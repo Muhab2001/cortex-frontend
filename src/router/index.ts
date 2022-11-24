@@ -24,6 +24,12 @@ const router = createRouter({
       name: "assignment",
       component: () => import("@/views/AssignmentView.vue"),
     },
+    // This is a temporary route for development purposes
+    {
+      path: "/announcement",
+      name: "announcement",
+      component: () => import("@/views/AnnouncementView.vue"),
+    },
   ],
 });
 

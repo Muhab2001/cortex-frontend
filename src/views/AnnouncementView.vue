@@ -20,14 +20,21 @@ const messenger = useMessage();
 const router = useRouter();
 
 // interfaces
-interface LoggingModel {
-  username: string | null;
-  password: string | null;
+interface AnnouncementModel {
+  title: string;
+  content: string;
+  sectionIds: number[];
+  // Should be removed but must discuss with muhab before that
+  courseId: number;
+  tag: string;
 }
 // state
-const model = ref<LoggingModel>({
-  username: null,
-  password: null,
+const model = ref<AnnouncementModel>({
+  title: "",
+  content: "",
+  sectionIds: [],
+  courseId: -1,
+  tag: "",
 });
 
 const rules: FormRules = {
@@ -44,31 +51,30 @@ const rules: FormRules = {
 };
 
 // handlers
-
 const submitForm = () => {
   console.log("HELLOOO!!");
 
-  formRef.value?.validate(
-    async (errors: Array<FormValidationError> | undefined) => {
-      if (!errors) {
-        try {
-          router.push("/home");
-          console.log(
-            await axios.post("/login", {
-              username: model.value.username,
-              password: model.value.password,
-            })
-          );
-          messenger.success("Successful sign in!");
-        } catch (e: any) {
-          messenger.error("Login Failed!");
-        }
-      } else {
-        console.log(errors);
-        messenger.error("Login Failed!");
-      }
-    }
-  );
+  // formRef.value?.validate(
+  //   async (errors: Array<FormValidationError> | undefined) => {
+  //     if (!errors) {
+  //       try {
+  //         router.push("/home");
+  //         console.log(
+  //           await axios.post("/login", {
+  //             username: model.value.username,
+  //             password: model.value.password,
+  //           })
+  //         );
+  //         messenger.success("Successful sign in!");
+  //       } catch (e: any) {
+  //         messenger.error("Login Failed!");
+  //       }
+  //     } else {
+  //       console.log(errors);
+  //       messenger.error("Login Failed!");
+  //     }
+  //   }
+  // );
 };
 </script>
 
@@ -87,17 +93,17 @@ const submitForm = () => {
       :model="model"
       :rules="rules"
     >
-      <NFormItem path="username" label="Username">
+      <NFormItem path="title" label="Title">
         <NInput
           type="text"
-          v-model:value="model.username"
+          v-model:value="model.title"
           @keydown.enter.prevent
         />
       </NFormItem>
-      <NFormItem path="password" label="Password">
+      <NFormItem path="contents" label="Contents">
         <NInput
           type="password"
-          v-model:value="model.password"
+          v-model:value="model.content"
           @keydown.enter.prevent
         />
       </NFormItem>
@@ -109,3 +115,5 @@ const submitForm = () => {
     </NForm>
   </main>
 </template>
+
+<style></style>

@@ -11,7 +11,7 @@ import { NBreadcrumb, NBreadcrumbItem } from "naive-ui";
       <div>
         <div class="t-flex t-mb-3">
           <!-- the cortex logo -->
-          <img class="t-w-10 t-mr-4" src="@/assets/logo_only_pure.svg" alt="" />
+          <img class="t-w-10 t-mr-4" src="@/assets/logo_only_pure.svg" alt="Cortex" />
           <h2 class="t-text-slate-600">Cortex</h2>
         </div>
         <!-- TODO: replace with a breadcrump -->
