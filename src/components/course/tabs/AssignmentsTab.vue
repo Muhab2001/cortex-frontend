@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import type {
-  AssignmentItemProps,
-  SectionTabProps,
-} from "typings/CourseViewTabs";
+import type { AssignmentItemProps } from "typings/CourseViewTabs";
 import AssignmentItem from "@/components/course/items/AssignmentItem.vue";
 
 import { useAuth } from "@/stores/auth";
+import { Role } from "@/enums/roles";
+import { Icon } from "@vicons/utils";
+import { Book24Filled } from "@vicons/fluent";
+interface SectionTabProps {
+  sectionId: number;
+  role: Role;
+}
+
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
 const items = ref<AssignmentItemProps[]>([]);
@@ -18,7 +23,9 @@ const auth = useAuth();
     <template #header>
       <div>
         <!-- icon -->
-        <span></span>
+        <span class="t-bg-[#bdd4ff]"
+          ><Icon color="#2998ff"> <Book24Filled></Book24Filled> </Icon
+        ></span>
         <!-- the header -->
         <span>Assignments</span>
       </div>
@@ -29,7 +36,7 @@ const auth = useAuth();
         <AssignmentItem
           :id="item.id"
           :deadline="item.deadline"
-          editable
+          :editable="props.role == Role.INSTRUCTOR"
           :maxPoints="item.maxPoints"
           :description="item.description"
           :title="item.title"

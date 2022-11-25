@@ -2,9 +2,9 @@
   <!-- include an outer framework -->
   <!-- conditional rendering for the slot according to user role -->
   <div>
-    <main>
+    <main class="t-flex">
       <!-- left-side menu -->
-      <aside class="t-columns-1 t-w-full md:t-w-[30%]">
+      <aside class="t-columns-1 t-w-full md:t-w-[28%] t-mr-3">
         <!-- section card -->
         <SectionCard
           clickable
@@ -21,20 +21,30 @@
             v-for="option in options"
             v-bind="option"
             :key="option.label"
+            :is-current="tab === option.label"
           />
         </section>
         <!-- section-specific -->
         <section></section>
       </aside>
       <!-- main items -->
-      <section class="t-columns-1 t-w-full md:t-w-[70%]">
+      <section class="t-columns-1 t-w-full md:t-w-[66%]">
         <!-- condiitonal rendering for slots (according to user role) -->
-        <template v-if="auth.userProfile.role == 2">
-          <InsrtuctorSlot />
+        <!-- TODO: define each slot as an async component -->
+        <template v-if="auth.userProfile.role == Role.INSTRUCTOR">
+          <InstructorSlot
+            :section-id="props.sectionId"
+            :role="Role.INSTRUCTOR"
+            :tab="tab"
+          />
         </template>
-        <template v-if="auth.userProfile.role == 1">
+        <template v-if="auth.userProfile.role == Role.STUDENT">
           <div>
-            <StudentSlot />
+            <StudentSlot
+              :section-id="props.sectionId"
+              :role="Role.INSTRUCTOR"
+              :tab="tab"
+            />
           </div>
         </template>
       </section>
@@ -44,6 +54,7 @@
 <script setup lang="ts">
 import CourseMenuOption from "@/components/course/courseMenuOption.vue";
 import SectionCard from "@/components/home/sectionCard.vue";
+import { Role } from "@/enums/roles";
 import { useAuth } from "@/stores/auth";
 import {
   Book24Filled,
@@ -52,7 +63,15 @@ import {
   Star20Filled,
 } from "@vicons/fluent";
 import type { SectionTab } from "typings/CourseViewTabs";
-import { ref, type Component } from "vue";
+import { defineAsyncComponent, ref, type Component } from "vue";
+
+const InstructorSlot = defineAsyncComponent(
+  () => import("./slots/InstructorSlot.vue")
+);
+const StudentSlot = defineAsyncComponent(
+  () => import("./slots/StudentSlot.vue")
+);
+
 interface CoruseProps {
   courseName: string;
   courseID: string;
@@ -76,7 +95,7 @@ const tab = ref<SectionTab>("Course Content");
 const options: CourseOption[] = [
   {
     label: "Course Content",
-    iconBG: "t-bg-[#bdd4ff]",
+    iconBG: "t-bg-blue-200",
     iconFill: "#2998ff",
     icon: Book24Filled,
   },

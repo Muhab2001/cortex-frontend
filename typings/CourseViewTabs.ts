@@ -1,5 +1,4 @@
-import type { Component } from "vue";
-import type { Role } from "./globals";
+import type { Role } from "@/enums/roles";
 
 export type SectionTab =
   | "Course Content"
@@ -8,13 +7,13 @@ export type SectionTab =
   | "Attendance"
   | "Announcements";
 
-export interface SectionTabProps {
+export interface SectionSlotProps {
   sectionId: number;
   role: Role;
   tab: SectionTab;
 }
 
-
+export type SectionTabProps = Omit<SectionSlotProps, "tab">;
 
 interface baseItemProps {
   id: number;
@@ -27,8 +26,9 @@ export interface ContentItemProps extends baseItemProps {
   fileUrls: string[];
 }
 
-export interface GradeItem extends baseItemProps {
+export interface GradeItemProps extends baseItemProps {
   score?: number;
+  assignmentId: number;
 }
 
 export interface AnnouncementItemProps extends baseItemProps {

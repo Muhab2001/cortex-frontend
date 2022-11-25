@@ -1,16 +1,29 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
+
 interface GradeItemProps {
   title: string;
   description?: string;
   lastUpdated?: string;
   editable: boolean;
   score?: number;
+  assignmentId: number;
 }
 
 const props = defineProps<GradeItemProps>();
+const router = useRouter();
 // TODO: a function to open the grade page, for instructors only
 
 function editGrades() {}
+
+function navigateToGradeView() {
+  router.push({
+    path: "/grade",
+    params: {
+      assignmentId: props.assignmentId,
+    },
+  });
+}
 </script>
 
 <template>

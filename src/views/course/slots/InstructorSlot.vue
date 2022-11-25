@@ -1,22 +1,42 @@
 <template>
+  <!-- This is the isntructor! -->
   <template v-if="props.tab === 'Course Content'">
-    <div></div>
+    <ContentTabVue
+      :role="auth.userProfile.role"
+      :section-id="props.sectionId"
+    />
   </template>
   <template v-if="props.tab === 'Assignments'">
-    <div></div>
+    <AssignmentsTab
+      :role="auth.userProfile.role"
+      :section-id="props.sectionId"
+    />
   </template>
   <template v-if="props.tab === 'Grades'">
-    <div></div>
+    <GradesTab :role="auth.userProfile.role" :section-id="props.sectionId" />
   </template>
   <template v-if="props.tab === 'Announcements'">
-    <div></div>
+    <AnnouncementsTab
+      :role="auth.userProfile.role"
+      :section-id="props.sectionId"
+    />
   </template>
 </template>
 
 <script setup lang="ts">
-import type { SectionTabProps } from "typings/CourseViewTabs";
+import ContentTabVue from "@/components/course/tabs/ContentTab.vue";
+import type { Role } from "@/enums/roles";
+import { useAuth } from "@/stores/auth";
+import type { SectionTab } from "typings/CourseViewTabs";
 import { ref } from "vue";
 
-const props = defineProps<SectionTabProps>();
+interface SectionSlotProps {
+  sectionId: number;
+  role: Role;
+  tab: SectionTab;
+}
+
+const props = defineProps<SectionSlotProps>();
+const auth = useAuth();
 </script>
 <style lang=""></style>

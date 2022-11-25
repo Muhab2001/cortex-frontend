@@ -1,13 +1,15 @@
 import type { User } from "typings/globals";
 import { defineStore } from "pinia";
 import { reactive, readonly } from "vue";
+import { Role } from "@/enums/roles";
 
 export const useAuth = defineStore("auth", () => {
   const userProfile = reactive<User>({
     username: "",
     fullname: "",
     photoUrl: "",
-    role: 1,
+    // ! should default to a student
+    role: Role.INSTRUCTOR,
   });
 
   // TODO proper fetching for the token
@@ -19,7 +21,7 @@ export const useAuth = defineStore("auth", () => {
     userProfile.username = username;
     userProfile.photoUrl =
       "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg";
-    userProfile.role = 2;
+    userProfile.role = Role.INSTRUCTOR;
 
     console.log(userProfile);
   }

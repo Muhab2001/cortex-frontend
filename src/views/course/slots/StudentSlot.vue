@@ -1,13 +1,24 @@
 <template>
   <template v-if="props.tab === 'Course Content'">
-    <ContentTabVue />
+    <ContentTabVue
+      :role="auth.userProfile.role"
+      :section-id="props.sectionId"
+    />
   </template>
   <template v-if="props.tab === 'Assignments'">
-    <AssignmentsTab />
+    <AssignmentsTab
+      :role="auth.userProfile.role"
+      :section-id="props.sectionId"
+    />
   </template>
-  <template v-if="props.tab === 'Grades'"> <GradesTab /> </template>
+  <template v-if="props.tab === 'Grades'">
+    <GradesTab :role="auth.userProfile.role" :section-id="props.sectionId" />
+  </template>
   <template v-if="props.tab === 'Announcements'">
-    <AnnouncementsTab />
+    <AnnouncementsTab
+      :role="auth.userProfile.role"
+      :section-id="props.sectionId"
+    />
   </template>
 </template>
 <script setup lang="ts">
@@ -15,11 +26,20 @@
 
 import { ref } from "vue";
 import ContentTabVue from "@/components/course/tabs/ContentTab.vue";
-import type { SectionTabProps } from "typings/CourseViewTabs";
 import AssignmentsTab from "@/components/course/tabs/AssignmentsTab.vue";
 import GradesTab from "@/components/course/tabs/GradesTab.vue";
 import AnnouncementsTab from "@/components/course/tabs/AnnouncementsTab.vue";
+import { useAuth } from "@/stores/auth";
+import type { SectionTab } from "typings/CourseViewTabs";
+import type { Role } from "typings/globals";
 
-const props = defineProps<SectionTabProps>();
+interface SectionSlotProps {
+  sectionId: number;
+  role: Role;
+  tab: SectionTab;
+}
+
+const props = defineProps<SectionSlotProps>();
+const auth = useAuth();
 </script>
 <style></style>

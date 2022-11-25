@@ -41,6 +41,7 @@ onMounted(() => {
         <div class="md:t-columns-2">
           <SectionCard
             clickable
+            :section-id="3"
             course-id="ICS321"
             course-name="Introduction to Database Systems"
             cover-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
@@ -49,6 +50,7 @@ onMounted(() => {
           />
           <SectionCard
             clickable
+            :section-id="4"
             course-id="SWE363"
             course-name="Web Engineering & Development"
             cover-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"

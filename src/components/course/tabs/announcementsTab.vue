@@ -2,10 +2,16 @@
 import { ref } from "vue";
 import AnnouncementItem from "@/components/course/items/AnnouncementItem.vue";
 
-import type {
-  AnnouncementItemProps,
-  SectionTabProps,
-} from "typings/CourseViewTabs";
+import type { AnnouncementItemProps, SectionTab } from "typings/CourseViewTabs";
+import { Icon } from "@vicons/utils";
+import { Speaker032Filled } from "@vicons/fluent";
+import { NCard } from "naive-ui";
+import type{ Role } from "@/enums/roles";
+
+interface SectionTabProps {
+  sectionId: number;
+  role: Role;
+}
 
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
@@ -17,7 +23,13 @@ const items = ref<AnnouncementItemProps[]>([]);
     <template #header>
       <div>
         <!-- icon -->
-        <span></span>
+        <span class="t-bg-[#ffb13b]"
+          ><Icon
+            color="#996518
+          "
+          >
+            <Speaker032Filled></Speaker032Filled> </Icon
+        ></span>
         <!-- the header -->
         <span>Announcements</span>
       </div>
