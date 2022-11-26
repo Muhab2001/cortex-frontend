@@ -5,9 +5,7 @@
       :key="option.path"
       :href="option.path"
     >
-      <span class="t-font-semibold t-text-blue-400 t-text-lg">{{
-        option.label
-      }}</span>
+      <span class="t-font-semibold t-text-lg">{{ option.label }}</span>
     </NBreadcrumbItem>
   </NBreadcrumb>
 </template>

@@ -73,6 +73,7 @@ import {
   readonly,
   reactive,
 } from "vue";
+import { useBreadCrumb } from "@/stores/breadcrump";
 
 const InstructorSlot = defineAsyncComponent(
   () => import("./slots/InstructorSlot.vue")
@@ -97,6 +98,7 @@ interface CourseOption {
 
 const props = defineProps<CourseViewProps>();
 const auth = useAuth();
+
 // local state
 const tab = ref<SectionTab>("Course Content");
 // TODO: replace with an API call
@@ -119,6 +121,20 @@ provide(
 );
 
 console.log(props);
+
+// breadcrumbs state
+const breadcrumbs = useBreadCrumb();
+
+breadcrumbs.updateOptions([
+  {
+    label: "Home",
+    path: "/home",
+  },
+  {
+    label: `${courseInfo.courseId}-${courseInfo.sectionNo}`,
+    path: `/course/${props.sectionId}`,
+  },
+]);
 
 const options: CourseOption[] = [
   {

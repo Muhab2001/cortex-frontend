@@ -15,12 +15,13 @@ import { FileType } from "@/enums/fileTypes";
 import { FileImage, File } from "@vicons/fa";
 import { Folder24Filled, Tabs24Filled } from "@vicons/fluent";
 import { NIcon, NTag } from "naive-ui";
-import { type Component, h, defineProps, defineEmits } from "vue";
+import { type Component, h, defineProps, defineEmits, computed } from "vue";
 
 interface AttachementProps {
   filetype: FileType;
   editable: boolean;
   fileUrl: string;
+  active: boolean;
 }
 
 const props = defineProps<AttachementProps>();
@@ -35,16 +36,20 @@ const createIcon = (icon: FileType) => {
     case FileType.JPEG:
     case FileType.JPG:
     case FileType.PNG:
-      return renderIcon(FileImage, { color: "#C060A1" });
+      return renderIcon(FileImage, {
+        color: props.active ? "#C060A1" : "grey",
+      });
 
     case FileType.DOCX:
     case FileType.PDF:
-      return renderIcon(File, { color: "#3E6D9C" });
+      return renderIcon(File, { color: props.active ? "#3E6D9C" : "grey" });
     case FileType.PPT:
     case FileType.PPTX:
-      return renderIcon(Tabs24Filled, { color: "#FF731D" });
+      return renderIcon(Tabs24Filled, {
+        color: props.active ? "#FF731D" : "grey",
+      });
     case FileType.FOLDER:
-      return renderIcon(Folder24Filled);
+      return renderIcon(Folder24Filled, { color: props.active ? "" : "grey" });
     default:
       throw new Error("File type unidentified");
   }
@@ -58,7 +63,7 @@ const renderIcon = (icon: Component, options?: { [key: string]: string }) => {
   };
 };
 
-const fileIcon = createIcon(props.filetype);
+const fileIcon = computed(() => createIcon(props.filetype));
 </script>
 <style scoped>
 a {

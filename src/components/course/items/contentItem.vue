@@ -3,8 +3,9 @@ import type { FileType } from "@/enums/fileTypes";
 import { Delete24Filled, Edit16Filled, Folder24Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
 import { NButton, NCard, NEllipsis, NIcon, useDialog } from "naive-ui";
-import { h, type Component, ref } from "vue";
+import { h, type Component, ref, reactive, watch, computed } from "vue";
 import FileAttachement from "@/components/utils/fileAttachement.vue";
+import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
 
 interface ContentItemProps {
   id: number;
@@ -13,6 +14,7 @@ interface ContentItemProps {
   lastUpdated: string;
   editable: boolean;
   fileUrls: string[];
+  visible: boolean;
 }
 
 const props = defineProps<ContentItemProps>();
@@ -31,15 +33,47 @@ const renderIcon = (icon: Component, options?: { [key: string]: string }) => {
   };
 };
 
-const headerIcon = renderIcon(Folder24Filled, { color: "#F49D1A", size: "24" });
+const itemState = reactive<ContentItemProps>({ ...props });
+
+const headerIcon = computed(() =>
+  renderIcon(Folder24Filled, {
+    color: itemState.visible ? "#F49D1A" : "grey",
+    size: "24",
+  })
+);
 
 // TODO: supply functions that trigger deletion or editing of content files
-
-function deleteItem() {}
 
 function updateFiles() {
   // TODO: open a popup to edit the files
 }
+
+function editItem() {
+  emits("edit", {
+    title: itemState.title,
+    description: itemState.description,
+    id: props.id,
+    fileUrls: itemState.fileUrls,
+    visible: itemState.visible,
+  });
+}
+
+function toggleContentForSection() {
+  itemState.visible = !itemState.visible;
+  console.log(itemState.visible);
+}
+
+function toggleContentForAll() {
+  itemState.visible = !itemState.visible;
+  // TODO: api call to toggle all other items in the same group
+}
+
+watch(
+  () => itemState.visible,
+  () => {
+    console.log(itemState.visible);
+  }
+);
 
 function deleteFile(fileURL: string) {
   // fire a confirmation modal, and delete on confirmation
@@ -62,7 +96,7 @@ function deleteFile(fileURL: string) {
 <template>
   <NCard
     hoverable
-    class="t-rounded-md t-w-full"
+    class="t-rounded-md t-w-full t-mb-2"
     content-style="display:flex; align-items: center; padding: 12px; flex-direction: column"
   >
     <div name="text-content" class="t-w-full">
@@ -82,13 +116,13 @@ function deleteFile(fileURL: string) {
                 expand-trigger="click"
                 :line-clamp="1"
                 class="t-font-semibold t-text-lg"
-                >{{ props.title }}</NEllipsis
+                >{{ itemState.title }}</NEllipsis
               >
             </span>
             <span v-if="props.editable" name="editing-bar">
               <NButton
                 class="t-mr-2"
-                @click="deleteItem"
+                @click="$emit('delete', props.id)"
                 strong
                 secondary
                 circle
@@ -99,25 +133,40 @@ function deleteFile(fileURL: string) {
                   </Icon>
                 </NIcon>
               </NButton>
-              <NButton @click="updateFiles" strong secondary circle type="info">
+              <NButton
+                class="t-mr-2"
+                @click="editItem"
+                strong
+                secondary
+                circle
+                type="info"
+              >
                 <NIcon size="18">
                   <Icon>
                     <Edit16Filled></Edit16Filled>
                   </Icon>
                 </NIcon>
               </NButton>
+              <VisibilityDropdown
+                :visible="itemState.visible"
+                @group-toggle="toggleContentForAll"
+                @single-toggle="toggleContentForSection"
+              ></VisibilityDropdown>
             </span>
           </span>
           <span
             class="t-text-md t-text-slate-500"
-            v-if="props.description"
+            v-if="itemState.description"
             name="item-description"
-            >{{ props.description }}</span
+            >{{ itemState.description }}</span
           >
           <span
-            ><span class="t-font-medium t-text-blue-400">{{
-              props.lastUpdated
-            }}</span></span
+            ><span
+              :class="`t-font-medium ${
+                itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
+              }`"
+              >{{ itemState.lastUpdated }}</span
+            ></span
           >
         </span>
       </span>
@@ -131,6 +180,7 @@ function deleteFile(fileURL: string) {
         :key="fileURL"
         :file-url="fileURL"
         :filetype="fileURL.split('.').slice(-1)[0] as FileType"
+        :active="itemState.visible"
       />
     </div>
   </NCard>

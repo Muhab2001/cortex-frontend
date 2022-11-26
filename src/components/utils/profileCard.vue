@@ -17,22 +17,15 @@
 </template>
 <script setup lang="ts">
 import { NAvatar, NDropdown } from "naive-ui";
-import { h } from "vue";
-import type { Component } from "vue";
-import { NIcon } from "naive-ui";
+
 import {
   PersonCircleOutline as UserIcon,
   LogOutOutline as LogoutIcon,
 } from "@vicons/ionicons5";
 import router from "@/router";
+import { useIcon } from "@/composables/useIcon";
 
-const renderIcon = (icon: Component, options?: { [key: string]: string }) => {
-  return () => {
-    return h(NIcon, options, {
-      default: () => h(icon),
-    });
-  };
-};
+const iconUtils = useIcon();
 
 const handleSelect = (key: string) => {
   if (key === "SignOut") {
@@ -45,7 +38,7 @@ const profileOptions = [
     label: "Update Picture",
 
     key: "editPic",
-    icon: renderIcon(UserIcon),
+    icon: iconUtils.renderIcon(UserIcon),
   },
   {
     label: "Sign out",
@@ -53,7 +46,7 @@ const profileOptions = [
     props: {
       style: "color: red",
     },
-    icon: renderIcon(LogoutIcon, { color: "red", size: "15px" }),
+    icon: iconUtils.renderIcon(LogoutIcon, { color: "red", size: "15px" }),
   },
 ];
 

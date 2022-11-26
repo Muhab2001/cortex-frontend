@@ -6,6 +6,7 @@
     :show="props.visible"
     :title="props.mode == 'edit' ? 'Edit Content' : 'Create Content'"
     transform-origin="center"
+    content-style="padding-bottom: 0px"
     preset="card"
     class="t-w-[80%]"
     @close="$emit('closed')"
@@ -27,7 +28,7 @@
     <div class="t-px-4 t-py-2 t-flex t-justify-between t-w-full t-items-center">
       <div class="t-w-fit t-py-0 title-container">
         <div class="t-flex t-items-center">
-          <span class="t-font-bold t-mr-2 t-text-xl t-text-blue-700">{{
+          <span class="t-font-bold t-mr-2 t-text-xl t-text-blue-500">{{
             courseMeta?.courseId
           }}</span>
           <span
@@ -49,18 +50,40 @@
       }}
     </div>
     <NForm class="t-mt-5" :model="modelRef" :rules="rules" ref="formRef">
+      <h2 class="t-font-semibold t-mb-0">Content Details</h2>
+      <p class="t-mb-4">Describe the content item for students</p>
       <NFormItem label="Title" path="title">
-        <NInput type="text" v-model:value="modelRef.title" /> </NFormItem
+        <NInput
+          maxlength="30"
+          type="text"
+          show-count
+          v-model:value="modelRef.title"
+        /> </NFormItem
       ><NFormItem label="Description" path="description">
         <NInput
           placeholder="Enter a brief description"
           type="textarea"
+          maxlength="200"
+          show-count
           path="description"
           v-model:value="modelRef.description"
         ></NInput>
       </NFormItem>
       <!-- TODO: create a sectionGroup id for grouped editing -->
-      <NFormItem label="Sections" path="sections">
+
+      <h2 class="t-font-semibold t-mb-0">Content Availability</h2>
+      <p class="t-mb-2">
+        Choose targeted sections, and the visibilty of created item
+      </p>
+      <NFormItem
+        class="t-inline-flex t-mr-4"
+        label-placement="left"
+        :label-style="{
+          fontWeight: 'bolder',
+        }"
+        label="Sections"
+        path="sections"
+      >
         <NCheckboxGroup v-model:value="modelRef.sections">
           <NCheckbox
             v-for="section in allSections"
@@ -70,7 +93,15 @@
           ></NCheckbox>
         </NCheckboxGroup>
       </NFormItem>
-      <NFormItem label="Content Visibility" path="visible">
+      <NFormItem
+        class="t-inline-flex"
+        label-placement="left"
+        :label-style="{
+          fontWeight: 'bolder',
+        }"
+        label="Content Visibility"
+        path="visible"
+      >
         <NSwitch
           class="t-py-2 t-h-10"
           :round="false"
@@ -95,9 +126,13 @@
           >
         </NSwitch>
       </NFormItem>
-      <NFormItem label="Attachements" path="attachements">
+      <h2 class="t-font-semibold t-mb-0 t-mt-3">Attachements</h2>
+      <p class="t-mb-0">Supply all needed files for the course item</p>
+
+      <NFormItem class="t-mt-0 t-pt-0" path="attachements">
         <!-- TODO: add the default file list on editing -->
         <NUpload
+          class="t-mt-0 t-pt-0"
           multiple
           ref="uploadRef"
           :default-upload="false"
@@ -109,8 +144,10 @@
     </NForm>
     <NDivider class="t-mt-0" />
     <template #footer>
-      <NButton class="t-mr-2" type="success">Submit</NButton>
-      <NButton type="default">Cancel</NButton>
+      <NButton @click="submitForm" class="t-mr-2" type="success"
+        >Submit</NButton
+      >
+      <NButton @click="$emit('closed')" type="default">Cancel</NButton>
     </template>
   </NModal>
 </template>
@@ -142,6 +179,7 @@ import {
   NCheckboxGroup,
   NButtonGroup,
   NEllipsis,
+  NInputGroupLabel,
 } from "naive-ui";
 import { ref, watch, inject, type CSSProperties } from "vue";
 

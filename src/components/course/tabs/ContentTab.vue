@@ -12,6 +12,7 @@
     v-if="props.role == Role.INSTRUCTOR"
     :visible="modalState.visible"
     :mode="modalState.mode"
+    :target-item="modalState.editedItem"
     @closed="
       () => {
         modalState.visible = false;
@@ -47,12 +48,14 @@
       <template v-for="item in items" :key="item.id">
         <ContentItem
           @delete="deleteItem"
+          @edit="updateItem"
           :id="item.id"
           :editable="props.role == Role.INSTRUCTOR"
           :description="item.description"
           :title="item.title"
           :lastUpdated="item.lastUpdated"
           :file-urls="item.fileUrls"
+          :visible="item.visible"
         />
       </template>
     </div>
@@ -80,10 +83,20 @@ interface SectionTabProps {
   role: Role;
 }
 
+interface EditedItemProps {
+  id: number;
+  title: string;
+  description?: string;
+
+  fileUrls: string[];
+  visible: boolean;
+}
+
 const dialog = useDialog();
 const modalState = reactive<{
   visible: boolean;
   mode: "create" | "edit";
+  editedItem?: EditedItemProps;
 }>({
   visible: false,
   mode: "create",
@@ -109,6 +122,18 @@ const items = ref<ContentItemProps[]>([
       "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
       "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
     ],
+    visible: true,
+  },
+  {
+    id: 2,
+    lastUpdated: new Date().toLocaleString(),
+    title: "Week 1 material",
+    description: "All material covered in week 1 lectures and labs",
+    fileUrls: [
+      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
+      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
+    ],
+    visible: false,
   },
 ]);
 
@@ -129,9 +154,15 @@ function deleteItem(itemID: number) {
   // on confirmation, remvoe from state list, and create a DELETE request on the api endpoint
 }
 
+function updateItem(item: EditedItemProps) {
+  modalState.mode = "edit";
+  modalState.editedItem = item;
+  modalState.visible = true;
+}
+
 function showModal() {
   console.log("Clicking");
-
+  modalState.mode = "create";
   modalState.visible = true;
 }
 </script>

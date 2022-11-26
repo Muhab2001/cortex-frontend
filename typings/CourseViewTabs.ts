@@ -20,6 +20,7 @@ interface baseItemProps {
   title: string;
   description?: string;
   lastUpdated: string;
+  visible: boolean;
 }
 
 export interface ContentItemProps extends baseItemProps {
