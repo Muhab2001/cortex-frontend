@@ -6,11 +6,14 @@ import {
   NForm,
   NFormItem,
   NInput,
+  NCheckboxGroup,
+  NCheckbox,
+  NSpace,
   useMessage,
   type FormInst,
   type FormRules,
 } from "naive-ui";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 
 // UI framwork logic
@@ -20,37 +23,69 @@ const messenger = useMessage();
 const router = useRouter();
 
 // interfaces
-interface AnnouncementModel {
-  title: string;
-  content: string;
-  sectionIds: number[];
-  // Should be removed but must discuss with muhab before that
-  courseId: number;
-  tag: string;
+interface Section {
+  // database id
+  sectionId: number,
+  // actual section number to be displayed to the user
+  sectionNumber: number,
 }
+
+interface Course {
+  courseId: string,
+  sections: Section[],
+}
+
+interface AnnouncementModel {
+  subject: string;
+  content: string;
+  tag: string;
+  courses: Course[];
+}
+
 // state
 const model = ref<AnnouncementModel>({
-  title: "",
+  subject: "",
   content: "",
-  sectionIds: [],
-  courseId: -1,
   tag: "",
+  courses: [
+    {
+      courseId: "ICS110",
+      sections:[
+        {sectionId: 1,
+        sectionNumber: 1},
+        {sectionId: 2,
+        sectionNumber: 2}
+      ]
+    },
+    {
+      courseId: "ICS210",
+      sections:[
+        {sectionId:3,
+        sectionNumber: 1},
+        {sectionId:4,
+        sectionNumber: 2},
+      ]
+    }
+  ],
 });
 
+const courseIds = computed<string[]>(() => model.value.courses.map((e) => e.courseId));
+
+const selectedSectionIds = ref<number[]>([]);
+
 const rules: FormRules = {
-  username: {
+  subject: {
     required: true,
-    message: "Please enter your name",
-    trigger: ["blur"],
-  },
-  password: {
-    required: true,
-    message: "Please enter your password",
+    message: "Subject must not be empty",
     trigger: ["blur"],
   },
 };
 
 // handlers
+const selectSection = () => {
+
+}
+
 const submitForm = () => {
   console.log("HELLOOO!!");
 
@@ -82,37 +117,73 @@ const submitForm = () => {
   <main
     class="t-w-[100vw] t-flex t-flex-col t-items-center t-justify-center t-h-full"
   >
-    <header class="t-flex-col t-items-center t-text-center">
-      <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">Cortex</h1>
-      <p class="t-mb-10">New Era of premium learning experience</p>
-    </header>
-    <NForm
-      class="t-w-[90vw] md:t-w-72 lg:t-w-80"
-      ref="formRef"
-      :label-width="80"
-      :model="model"
-      :rules="rules"
-    >
-      <NFormItem path="title" label="Title">
-        <NInput
-          type="text"
-          v-model:value="model.title"
-          @keydown.enter.prevent
-        />
-      </NFormItem>
-      <NFormItem path="contents" label="Contents">
-        <NInput
-          type="password"
-          v-model:value="model.content"
-          @keydown.enter.prevent
-        />
-      </NFormItem>
-      <NButton
-        @click="submitForm"
-        class="t-w-full hover:t-bg-green-500 hover:t-text-white t-mt-10"
-        >Login</NButton
+    <section>
+      <header class="t-flex-col t-items-center t-text-center">
+        <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">Create New Announcment</h1>
+      </header>
+      <NForm
+        class="t-w-[90vw] md:t-w-72 lg:t-w-80"
+        ref="formRef"
+        label-placement="top"
+        :label-width="80"
+        :model="model"
+        :rules="rules"
       >
-    </NForm>
+        <NFormItem path="subject" label="Subject">
+          <NInput
+            type="text"
+            placeholder="Enter a subject"
+            v-model:value="model.subject"
+            @keydown.enter.prevent
+          />
+        </NFormItem>
+        <NFormItem path="content" label="Content">
+          <NInput
+            v-model:value="model.content"
+            placeholder="Enter the content of the announcment"
+            type="textarea"
+            @keydown.enter.prevent
+            :autosize="{
+              minRows: 3
+            }"
+          />
+        </NFormItem>
+        <NFormItem path="tag" label="Tag">
+          <NInput
+            type="text"
+            v-model:value="model.tag"
+            @keydown.enter.prevent
+          />
+        </NFormItem>
+        <NFormItem label="Courses">
+          <!-- all courses checkbox group -->
+          <NCheckboxGroup v-model:value="selectedSectionIds" @update:value="selectSection">
+            <NSpace vertical size="medium">
+              <div v-for="course in model.courses" :key="course.courseId">
+                <!-- course checkbox -->
+                <NCheckbox :label="course.courseId" />
+                <NSpace vertical size="small">
+                  <!-- course sections checkboxs -->
+                  <NCheckbox
+                    v-for="section in course.sections"
+                    :key="section.sectionId"
+                    :value="section.sectionId"
+                    :label="'Section ' + section.sectionNumber"
+                    class="t-ml-6"
+          
+                  />
+                </NSpace>
+              </div>
+            </NSpace>
+          </NCheckboxGroup>
+        </NFormItem>
+        <NButton
+          @click="submitForm"
+          class="t-w-full hover:t-bg-green-500 hover:t-text-white t-mt-10"
+          >Submit</NButton
+        >
+      </NForm>
+    </section>
   </main>
 </template>
 
