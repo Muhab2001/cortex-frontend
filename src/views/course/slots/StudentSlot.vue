@@ -31,7 +31,7 @@ import GradesTab from "@/components/course/tabs/GradesTab.vue";
 import AnnouncementsTab from "@/components/course/tabs/AnnouncementsTab.vue";
 import { useAuth } from "@/stores/auth";
 import type { SectionTab } from "typings/CourseViewTabs";
-import type { Role } from "typings/globals";
+import type { Role } from "@/enums/roles";
 
 interface SectionSlotProps {
   sectionId: number;

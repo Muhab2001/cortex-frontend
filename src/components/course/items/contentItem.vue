@@ -18,6 +18,7 @@ interface ContentItemProps {
 const props = defineProps<ContentItemProps>();
 const emits = defineEmits<{
   (e: "delete", id: number): void;
+  (e: "edit", item: Omit<ContentItemProps, "editable" | "lastUpdated">): void;
 }>();
 const dialog = useDialog();
 const itemFiles = ref<string[]>(props.fileUrls);

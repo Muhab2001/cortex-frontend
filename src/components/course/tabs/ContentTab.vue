@@ -1,11 +1,79 @@
+<template>
+  <!-- <ContentModal
+    @closed="
+      () => {
+        modalState.visible = false;
+      }
+    "
+    :mode="modalState.mode"
+    :visible="modalState.visible"
+  /> -->
+  <ContentModal
+    v-if="props.role == Role.INSTRUCTOR"
+    :visible="modalState.visible"
+    :mode="modalState.mode"
+    @closed="
+      () => {
+        modalState.visible = false;
+      }
+    "
+  />
+  <NCard
+    content-style="padding: 16px 8px; padding-top:0"
+    header-style="padding-bottom: 0"
+  >
+    <!-- This is the content tab! -->
+    <!-- tab header -->
+    <template #header>
+      <div class="t-flex t-items-center">
+        <!-- icon -->
+        <span
+          class="t-h-full t-inline-flex t-justify-center t-p-2 t-items-center t-rounded-md t-mr-3 t-bg-blue-200"
+          ><Icon size="25" color="#2998ff"> <Book24Filled></Book24Filled> </Icon
+        ></span>
+        <!-- the header -->
+        <span class="t-text-lg t-font-semibold">Course Content</span>
+      </div>
+      <NButton @click="showModal" class="t-w-full t-mt-3" type="info"
+        ><span
+          ><NIcon class="t-mr-3" size="20"
+            ><Icon><AddCircle24Filled></AddCircle24Filled></Icon></NIcon></span
+        ><span>Add new content</span></NButton
+      >
+      <NDivider></NDivider>
+    </template>
+    <!-- main card content -->
+    <div>
+      <template v-for="item in items" :key="item.id">
+        <ContentItem
+          @delete="deleteItem"
+          :id="item.id"
+          :editable="props.role == Role.INSTRUCTOR"
+          :description="item.description"
+          :title="item.title"
+          :lastUpdated="item.lastUpdated"
+          :file-urls="item.fileUrls"
+        />
+      </template>
+    </div>
+  </NCard>
+</template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { reactive, ref, watch, watchEffect } from "vue";
 import type { ContentItemProps } from "typings/CourseViewTabs";
 import ContentItem from "../items/ContentItem.vue";
 import { Role } from "@/enums/roles";
 import { Icon } from "@vicons/utils";
 import { AddCircle24Filled, Book24Filled } from "@vicons/fluent";
-import { NButton, NCard, NDivider, NIcon, useDialog } from "naive-ui";
+import {
+  NButton,
+  NCard,
+  NDivider,
+  NIcon,
+  numberAnimationProps,
+  useDialog,
+} from "naive-ui";
+import ContentModal from "../utils/ContentModal.vue";
 
 interface SectionTabProps {
   sectionId: number;
@@ -13,7 +81,22 @@ interface SectionTabProps {
 }
 
 const dialog = useDialog();
-const modalVisible = ref<boolean>(false);
+const modalState = reactive<{
+  visible: boolean;
+  mode: "create" | "edit";
+}>({
+  visible: false,
+  mode: "create",
+});
+
+console.log(modalState);
+
+watch(
+  () => modalState.visible,
+  () => {
+    console.log(modalState);
+  }
+);
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
 const items = ref<ContentItemProps[]>([
@@ -45,48 +128,11 @@ function deleteItem(itemID: number) {
   });
   // on confirmation, remvoe from state list, and create a DELETE request on the api endpoint
 }
-</script>
-<template>
-  <NCard
-    content-style="padding: 16px 8px; padding-top:0"
-    header-style="padding-bottom: 0"
-  >
-    <!-- This is the content tab! -->
-    <!-- tab header -->
-    <template #header>
-      <div class="t-flex t-items-center">
-        <!-- icon -->
-        <span
-          class="t-h-full t-inline-flex t-justify-center t-p-2 t-items-center t-rounded-md t-mr-3 t-bg-blue-200"
-          ><Icon size="25" color="#2998ff"> <Book24Filled></Book24Filled> </Icon
-        ></span>
-        <!-- the header -->
-        <span class="t-text-lg t-font-semibold">Course Content</span>
-      </div>
-      <NButton class="t-w-full t-mt-3" type="info"
-        ><span
-          ><NIcon class="t-mr-3" size="20"
-            ><Icon><AddCircle24Filled></AddCircle24Filled></Icon></NIcon></span
-        ><span>Add new content</span></NButton
-      >
-      <NDivider></NDivider>
-    </template>
-    <!-- main card content -->
-    <div>
-      <template v-for="item in items" :key="item.id">
-        <ContentItem
-          @delete="deleteItem"
-          :id="item.id"
-          :editable="props.role == Role.INSTRUCTOR"
-          :description="item.description"
-          :title="item.title"
-          :lastUpdated="item.lastUpdated"
-          :file-urls="item.fileUrls"
-        />
-      </template>
-    </div>
-  </NCard>
-</template>
 
+function showModal() {
+  console.log("Clicking");
+
+  modalState.visible = true;
+}
+</script>
 <style></style>
-<style lang=""></style>

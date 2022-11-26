@@ -7,6 +7,7 @@ interface SectionCardProps {
   courseName: string;
   sectionNum: number | string;
   sectionId: number;
+  term: string;
   courseId: string;
   coverUrl: string;
   instructorImgUrl: string;
@@ -24,11 +25,8 @@ const router = useRouter();
     content-style="width: 100%; padding: 0px; height: 300px"
     @click="
       router.push({
-        path: '/course',
+        path: `/course/${props.sectionId}`,
         params: {
-          courseName: props.courseName,
-          courseId: props.courseId,
-          sectionNum: props.sectionNum,
           sectionId: props.sectionId,
         },
       })
@@ -63,7 +61,7 @@ const router = useRouter();
   </NCard>
 </template>
 
-<style>
+<style scoped>
 .title-container::before {
   content: "";
   margin: auto;
