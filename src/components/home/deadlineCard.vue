@@ -8,21 +8,28 @@
     <!--  card header -->
     <template #header
       ><div class="t-flex t-w-full t-justify-between t-flex-wrap">
-        <div id="course-info">
-          <div id="course-meta-info" class="t-flex t-items-center t-h-fit">
-            <span class="t-font-bold t-mr-2 t-text-lg t-text-blue-500">{{
-              props.courseId
-            }}</span
-            ><span
-              class="t-text-xs t-font-medium t-bg-blue-200 t-py-[0.175rem] t-px-2 t-rounded-md t-text-blue-600"
-              >{{ props.sectionNo }}</span
-            >
+        <div id="course-info" class="t-w-full">
+          <div
+            id="course-meta-info"
+            class="t-flex t-justify-between t-items-center t-h-fit"
+          >
+            <span>
+              <span class="t-font-bold t-mr-2 t-text-lg t-text-blue-500">{{
+                props.courseId
+              }}</span
+              ><span
+                class="t-text-xs t-font-medium t-bg-blue-200 t-py-[0.175rem] t-px-2 t-rounded-md t-text-blue-600"
+                >{{ props.sectionNo }}</span
+              >
+            </span>
+            <span class="t-text-slate-500 t-font-medium t-text-sm">{{
+              props.deadline.toLocaleString()
+            }}</span>
           </div>
-          <span class="t-text-sm">{{ props.courseName }}</span>
+          <NEllipsis line-clamp="1" expand-trigger="click" class="t-text-sm"
+            >{{ props.courseName }}
+          </NEllipsis>
         </div>
-        <span class="t-text-slate-500 t-font-medium t-text-sm">{{
-          props.deadline.toLocaleDateString()
-        }}</span>
       </div></template
     >
 
@@ -46,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { NCard, NDivider, NProgress } from "naive-ui";
+import { NCard, NDivider, NProgress, NEllipsis } from "naive-ui";
 import { computed, onUnmounted, ref } from "vue";
 
 //  prop interface

@@ -1,13 +1,4 @@
 <template>
-  <!-- <ContentModal
-    @closed="
-      () => {
-        modalState.visible = false;
-      }
-    "
-    :mode="modalState.mode"
-    :visible="modalState.visible"
-  /> -->
   <ContentModal
     v-if="props.role == Role.INSTRUCTOR"
     :visible="modalState.visible"
@@ -26,7 +17,7 @@
     <!-- This is the content tab! -->
     <!-- tab header -->
     <template #header>
-      <div class="t-flex t-items-center">
+      <div class="t-hidden md:t-visible md:t-flex t-items-center">
         <!-- icon -->
         <span
           class="t-h-full t-inline-flex t-justify-center t-p-2 t-items-center t-rounded-md t-mr-3 t-bg-blue-200"
@@ -35,16 +26,19 @@
         <!-- the header -->
         <span class="t-text-lg t-font-semibold">Course Content</span>
       </div>
-      <NButton @click="showModal" class="t-w-full t-mt-3" type="info"
+      <NButton
+        @click="showModal"
+        class="t-w-full t-mt-0 md:t-mt-3 t-mb-5 md:t-mb-0"
+        type="info"
         ><span
           ><NIcon class="t-mr-3" size="20"
             ><Icon><AddCircle24Filled></AddCircle24Filled></Icon></NIcon></span
         ><span>Add new content</span></NButton
       >
-      <NDivider></NDivider>
+      <NDivider class="t-hidden md:t-flex"></NDivider>
     </template>
     <!-- main card content -->
-    <div>
+    <div class="t-columns-1 lg:t-columns-2">
       <template v-for="item in items" :key="item.id">
         <ContentItem
           @delete="deleteItem"
@@ -62,20 +56,13 @@
   </NCard>
 </template>
 <script setup lang="ts">
-import { reactive, ref, watch, watchEffect } from "vue";
+import { reactive, ref, watch } from "vue";
 import type { ContentItemProps } from "typings/CourseViewTabs";
 import ContentItem from "../items/ContentItem.vue";
 import { Role } from "@/enums/roles";
 import { Icon } from "@vicons/utils";
 import { AddCircle24Filled, Book24Filled } from "@vicons/fluent";
-import {
-  NButton,
-  NCard,
-  NDivider,
-  NIcon,
-  numberAnimationProps,
-  useDialog,
-} from "naive-ui";
+import { NButton, NCard, NDivider, NIcon, useDialog } from "naive-ui";
 import ContentModal from "../utils/ContentModal.vue";
 
 interface SectionTabProps {
@@ -135,6 +122,39 @@ const items = ref<ContentItemProps[]>([
     ],
     visible: false,
   },
+  {
+    id: 6,
+    lastUpdated: new Date().toLocaleString(),
+    title: "Week 1 material",
+    description: "All material covered in week 1 lectures and labs",
+    fileUrls: [
+      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
+      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
+    ],
+    visible: false,
+  },
+  {
+    id: 4,
+    lastUpdated: new Date().toLocaleString(),
+    title: "Week 1 material",
+    description: "All material covered in week 1 lectures and labs",
+    fileUrls: [
+      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
+      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
+    ],
+    visible: false,
+  },
+  {
+    id: 10,
+    lastUpdated: new Date().toLocaleString(),
+    title: "Week 1 material",
+    description: "All material covered in week 1 lectures and labs",
+    fileUrls: [
+      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
+      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
+    ],
+    visible: false,
+  },
 ]);
 
 function deleteItem(itemID: number) {
@@ -161,7 +181,6 @@ function updateItem(item: EditedItemProps) {
 }
 
 function showModal() {
-  console.log("Clicking");
   modalState.mode = "create";
   modalState.visible = true;
 }

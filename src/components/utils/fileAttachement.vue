@@ -1,7 +1,7 @@
 <template>
   <NTag
     @close="$emit('delete', props.fileUrl)"
-    class="t-mr-1 t-inline-flex t-items-center"
+    class="t-mr-1 t-mb-1 t-inline-flex t-items-center"
     :closable="props.editable"
   >
     <a :href="props.fileUrl" download
@@ -15,7 +15,7 @@ import { FileType } from "@/enums/fileTypes";
 import { FileImage, File } from "@vicons/fa";
 import { Folder24Filled, Tabs24Filled } from "@vicons/fluent";
 import { NIcon, NTag } from "naive-ui";
-import { type Component, h, defineProps, defineEmits, computed } from "vue";
+import { type Component, h, computed } from "vue";
 
 interface AttachementProps {
   filetype: FileType;

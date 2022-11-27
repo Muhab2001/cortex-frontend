@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { Delete24Filled, Edit16Filled } from "@vicons/fluent";
+import { useIcon } from "@/composables/useIcon";
+import { Envelope } from "@vicons/fa";
+import { Delete24Filled, Edit16Filled, Folder24Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
-import { NButton, NTag } from "naive-ui";
-import { h, type Component, ref } from "vue";
+import { NButton, NCard, NTag, useDialog, NEllipsis, NIcon } from "naive-ui";
+import { computed, reactive } from "vue";
+import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
 
 interface AnnouncementItemProps {
   id: number;
@@ -11,41 +14,140 @@ interface AnnouncementItemProps {
   lastUpdated: string;
   editable: boolean;
   tag: string;
+  visible: boolean;
 }
 
 const props = defineProps<AnnouncementItemProps>();
-
+const emits = defineEmits<{
+  (e: "delete", id: number): void;
+  (
+    e: "edit",
+    item: Omit<AnnouncementItemProps, "editable" | "lastUpdated">
+  ): void;
+}>();
+const iconUtils = useIcon();
+const itemState = reactive<AnnouncementItemProps>({ ...props });
+const headerIcon = computed(() =>
+  iconUtils.renderIcon(Envelope, {
+    color: itemState.visible ? "#F49D1A" : "grey",
+    size: "20",
+  })
+);
 // TODO: supply functions that trigger deletion or editing of content files
+const dialog = useDialog();
 
 function deleteItem() {}
 
 function updateItem() {
   // TODO: open a popup to edit the files
 }
+
+function editItem() {
+  emits("edit", {
+    title: itemState.title,
+    description: itemState.description,
+    id: props.id,
+    tag: itemState.tag,
+    visible: itemState.visible,
+  });
+}
+
+function toggleContentForSection() {
+  itemState.visible = !itemState.visible;
+}
+
+function toggleContentForAll() {
+  itemState.visible = !itemState.visible;
+  // TODO: api call to toggle all other items in the same group
+}
 </script>
 
 <template>
-  <div name="text-content">
-    <span name="item-meta-container">
-      <span name="item-title">{{ props.title }}</span>
-      <span v-if="props.description" name="item-description">{{
-        props.description
-      }}</span>
-      <span>{{ props.lastUpdated }}</span>
-    </span>
-    <span v-if="props.editable" name="editing-bar">
-      <NButton @click="deleteItem" strong secondary circle type="error"
-        ><Icon>
-          <Delete24Filled></Delete24Filled>
-        </Icon>
-      </NButton>
-      <NButton @click="updateItem" strong secondary circle type="info">
-        <Icon>
-          <Edit16Filled></Edit16Filled>
-        </Icon>
-      </NButton>
-    </span>
-  </div>
+  <NCard
+    hoverable
+    class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer"
+    content-style="display:flex; align-items: center; padding: 12px; flex-direction: column"
+  >
+    <div name="text-content" class="t-w-full">
+      <span
+        class="t-inline-flex t-flex-col t-w-full"
+        name="item-meta-container"
+      >
+        <span
+          name="item-title"
+          class="t-h-full t-inline-flex t-items-center t-justify-between t-w-full t-mb-2"
+        >
+          <span name="item-text-title" class="t-inline-flex t-items-center">
+            <span class="t-mr-2 t-h-full t-flex t-items-center"
+              ><headerIcon></headerIcon></span
+            ><NEllipsis
+              expand-trigger="click"
+              :line-clamp="1"
+              class="t-font-semibold t-text-md"
+              >{{ itemState.title }}</NEllipsis
+            >
+          </span>
+
+          <span v-if="props.editable" name="editing-bar">
+            <NButton
+              class="t-mr-2"
+              @click="$emit('delete', props.id)"
+              strong
+              secondary
+              circle
+              type="error"
+              ><NIcon size="18">
+                <Icon>
+                  <Delete24Filled></Delete24Filled>
+                </Icon>
+              </NIcon>
+            </NButton>
+            <NButton
+              class="t-mr-2"
+              @click="editItem"
+              strong
+              secondary
+              circle
+              type="info"
+            >
+              <NIcon size="18">
+                <Icon>
+                  <Edit16Filled></Edit16Filled>
+                </Icon>
+              </NIcon>
+            </NButton>
+            <VisibilityDropdown
+              :visible="itemState.visible"
+              @group-toggle="toggleContentForAll"
+              @single-toggle="toggleContentForSection"
+            ></VisibilityDropdown>
+          </span>
+        </span>
+        <div class="t-flex t-flex-wrap">
+          <span
+            :class="`t-py-[0.2rem] t-px-1 t-rounded-sm t-text-xs ${
+              itemState.visible ? 't-bg-pink-500' : 't-bg-gray-500'
+            } t-text-white t-mr-2`"
+            >{{ itemState.tag }}</span
+          >
+          <span
+            :class="`t-font-medium ${
+              itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
+            }`"
+            >{{ itemState.lastUpdated }}</span
+          >
+        </div>
+        <NEllipsis
+          line-clamp="3"
+          class="t-text-md t-text-slate-500"
+          v-if="itemState.description"
+          expand-trigger="click"
+          name="item-description"
+          >{{ itemState.description }}</NEllipsis
+        >
+      </span>
+    </div>
+  </NCard>
 </template>
 
 <style></style>

@@ -2,12 +2,13 @@
   <!-- include an outer framework -->
   <!-- conditional rendering for the slot according to user role -->
   <div>
-    <main class="t-flex">
+    <main class="md:t-flex t-columns-1 md:t-columns-2">
       <!-- left-side menu -->
-      <aside class="t-columns-1 t-w-full md:t-w-[28%] t-mr-3">
+      <aside class="t-columns-1 t-w-full md:t-w-[40%] lg:t-w-[28%] t-mr-3">
         <!-- section card -->
         <SectionCard
           clickable
+          shortened
           :term="courseInfo.term"
           :course-id="courseInfo.courseId"
           :course-name="courseInfo.courseName"
@@ -17,19 +18,33 @@
           instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
         />
         <!-- options menu -->
-        <section>
-          <CourseMenuOption
-            v-for="option in options"
-            v-bind="option"
-            :key="option.label"
-            :is-current="tab === option.label"
-          />
+        <section class="t-hidden md:t-flex">
+          <NButtonGroup vertical class="t-w-full">
+            <CourseMenuOption
+              @switch-tab="switchTab"
+              v-for="option in options"
+              v-bind="option"
+              :key="option.label"
+              :is-current="tab === option.label"
+            />
+          </NButtonGroup>
         </section>
-        <!-- section-specific -->
-        <section></section>
+        <div
+          class="md:t-hidden t-border-t-2 t-border-t-solid t-shadow-2xl t-bg-white t-fixed t-bottom-0 t-left-0 t-z-50 t-h-fit t-w-full"
+        >
+          <NButtonGroup class="t-mx-auto t-px-2 t-bg-white t-w-full">
+            <CourseMenuOption
+              @switch-tab="switchTab"
+              v-for="option in options"
+              v-bind="{ ...option, contracted: true }"
+              :key="option.label"
+              :is-current="tab === option.label"
+            />
+          </NButtonGroup>
+        </div>
       </aside>
       <!-- main items -->
-      <section class="t-columns-1 t-w-full md:t-w-[66%]">
+      <section class="t-columns-1 t-w-full md:t-w-[60%] lg:t-w-[70%]">
         <!-- condiitonal rendering for slots (according to user role) -->
         <!-- TODO: define each slot as an async component -->
         <template v-if="auth.userProfile.role == Role.INSTRUCTOR">
@@ -69,11 +84,13 @@ import {
   defineAsyncComponent,
   ref,
   type Component,
+  watch,
   provide,
   readonly,
   reactive,
 } from "vue";
 import { useBreadCrumb } from "@/stores/breadcrump";
+import { NButtonGroup, NCard } from "naive-ui";
 
 const InstructorSlot = defineAsyncComponent(
   () => import("./slots/InstructorSlot.vue")
@@ -101,6 +118,7 @@ const auth = useAuth();
 
 // local state
 const tab = ref<SectionTab>("Course Content");
+
 // TODO: replace with an API call
 const courseInfo = reactive({
   courseName: "Management of Database Systems",
@@ -120,7 +138,12 @@ provide(
   })
 );
 
-console.log(props);
+watch(
+  () => tab,
+  () => {
+    console.log(tab);
+  }
+);
 
 // breadcrumbs state
 const breadcrumbs = useBreadCrumb();
@@ -164,8 +187,9 @@ const options: CourseOption[] = [
   },
 ];
 
-function switchTab(newIndex: SectionTab) {
-  tab.value = newIndex;
+function switchTab(label: string): void {
+  console.log("FINALLY!", tab.value);
+  tab.value = label as SectionTab;
 }
 </script>
 <style></style>

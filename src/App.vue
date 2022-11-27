@@ -8,15 +8,14 @@ import BreadcrumbWrapper from "./components/utils/breadcrumbWrapper.vue";
 const props = defineProps<{ header: boolean }>();
 
 const auth = useAuth();
-console.log(auth.userProfile);
 
 const route = useRoute();
 </script>
 
 <template>
   <div class="t-px-3 t-py-4 md:t-px-4 md:t-py-8">
-    <NConfigProvider style="width: 100%; height: 100vh; margin: 0">
-      <NMessageProvider style="width: 100vw; height: 100vh">
+    <NConfigProvider style="width: 100%; margin: 0; height: 100%">
+      <NMessageProvider style="width: 100vw; height: 100%">
         <NDialogProvider>
           <header
             v-if="route.name !== 'login'"

@@ -42,6 +42,7 @@ onMounted(() => {
           <SectionCard
             clickable
             :section-id="3"
+            :shortened="false"
             term="221"
             course-id="ICS321"
             course-name="Introduction to Database Systems"
@@ -51,6 +52,7 @@ onMounted(() => {
           />
           <SectionCard
             clickable
+            :shortened="false"
             term="221"
             :section-id="4"
             course-id="SWE363"

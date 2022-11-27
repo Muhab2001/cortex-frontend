@@ -1,13 +1,17 @@
 <template>
-  <NDropdown trigger="click" :options="visibilityOptions" @select="handleSelect"
-    ><NButton
-      strong
-      secondary
-      circle
-      :type="props.visible ? 'primary' : 'tertiary'"
-    >
-      <NTooltip trigger="hover">
-        <template #trigger>
+  <NDropdown
+    trigger="click"
+    :options="visibilityOptions"
+    @select="handleSelect"
+  >
+    <NTooltip trigger="hover">
+      <template #trigger
+        ><NButton
+          strong
+          secondary
+          circle
+          :type="props.visible ? 'primary' : 'tertiary'"
+        >
           <NIcon v-if="props.visible" size="18">
             <Icon>
               <Eye20Filled></Eye20Filled>
@@ -17,13 +21,13 @@
           <NIcon v-else size="18"
             ><Icon><EyeOff16Filled></EyeOff16Filled></Icon
           ></NIcon>
-        </template>
-        {{
-          props.visible
-            ? "Item is visible for this section"
-            : "Item is hidden for this section"
-        }}</NTooltip
-      ></NButton
+        </NButton>
+      </template>
+      {{
+        props.visible
+          ? "Item is visible for this section"
+          : "Item is hidden for this section"
+      }}</NTooltip
     ></NDropdown
   >
 </template>

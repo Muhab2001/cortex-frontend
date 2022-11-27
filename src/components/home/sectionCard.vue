@@ -12,6 +12,7 @@ interface SectionCardProps {
   coverUrl: string;
   instructorImgUrl: string;
   clickable: boolean;
+  shortened: boolean;
 }
 
 const props = defineProps<SectionCardProps>();
@@ -56,7 +57,7 @@ const router = useRouter();
         </div>
         <NEllipsis :line-clamp="1">{{ props.courseName }}</NEllipsis>
       </div>
-      <NAvatar round :src="props.instructorImgUrl" />
+      <NAvatar v-if="!props.shortened" round :src="props.instructorImgUrl" />
     </div>
   </NCard>
 </template>
