@@ -13,7 +13,7 @@
           :course-id="courseInfo.courseId"
           :course-name="courseInfo.courseName"
           :section-id="3"
-          cover-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
+          cover-url="https://images.unsplash.com/photo-1597852074816-d933c7d2b988?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8ZGF0YWJhc2VzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60"
           :section-num="courseInfo.sectionNo"
           instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
         />
@@ -117,7 +117,7 @@ const props = defineProps<CourseViewProps>();
 const auth = useAuth();
 
 // local state
-const tab = ref<SectionTab>("Course Content");
+const tab = ref<SectionTab>("Assignments");
 
 // TODO: replace with an API call
 const courseInfo = reactive({

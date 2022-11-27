@@ -39,6 +39,9 @@ export interface AnnouncementItemProps extends baseItemProps {
 export interface AssignmentItemProps extends baseItemProps {
   deadline: string;
   maxPoints: number;
+  submissions: number | string;
+  submissionsLeft?: number;
+  fileUrls: string[];
 }
 
 export type Editable<T> = T & { editable: boolean };

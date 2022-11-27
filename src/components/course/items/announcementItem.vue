@@ -3,7 +3,14 @@ import { useIcon } from "@/composables/useIcon";
 import { Envelope } from "@vicons/fa";
 import { Delete24Filled, Edit16Filled, Folder24Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
-import { NButton, NCard, NTag, useDialog, NEllipsis, NIcon } from "naive-ui";
+import {
+  NButton,
+  NCard,
+  NDivider,
+  useDialog,
+  NEllipsis,
+  NIcon,
+} from "naive-ui";
 import { computed, reactive } from "vue";
 import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
 
@@ -66,7 +73,8 @@ function toggleContentForAll() {
   <NCard
     hoverable
     class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer"
-    content-style="display:flex; align-items: center; padding: 12px; flex-direction: column"
+    content-style="display:flex; align-items: center; padding: 12px; flex-direction: column; padding-bottom: 1px"
+    footer-style="padding-bottom: 6px"
   >
     <div name="text-content" class="t-w-full">
       <span
@@ -75,7 +83,7 @@ function toggleContentForAll() {
       >
         <span
           name="item-title"
-          class="t-h-full t-inline-flex t-items-center t-justify-between t-w-full t-mb-2"
+          class="t-h-full t-inline-flex t-items-center t-justify-between t-w-full t-mb-0"
         >
           <span name="item-text-title" class="t-inline-flex t-items-center">
             <span class="t-mr-2 t-h-full t-flex t-items-center"
@@ -125,16 +133,10 @@ function toggleContentForAll() {
         </span>
         <div class="t-flex t-flex-wrap">
           <span
-            :class="`t-py-[0.2rem] t-px-1 t-rounded-sm t-text-xs ${
+            :class="`t-py-[0.2rem] t-px-1 t-rounded-sm t-text-xs t-mb-3 ${
               itemState.visible ? 't-bg-pink-500' : 't-bg-gray-500'
             } t-text-white t-mr-2`"
             >{{ itemState.tag }}</span
-          >
-          <span
-            :class="`t-font-medium ${
-              itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
-            }`"
-            >{{ itemState.lastUpdated }}</span
           >
         </div>
         <NEllipsis
@@ -147,6 +149,18 @@ function toggleContentForAll() {
         >
       </span>
     </div>
+    <template #footer
+      ><div class="t-flex t-flex-wrap">
+        <NDivider class="t-py-0 t-my-1"></NDivider>
+        <span class="t-font-thin t-mr-2">Last Updated </span>
+        <span
+          :class="`t-font-medium ${
+            itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
+          }`"
+          >{{ itemState.lastUpdated }}</span
+        >
+      </div>
+    </template>
   </NCard>
 </template>
 

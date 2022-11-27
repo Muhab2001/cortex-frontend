@@ -38,7 +38,37 @@ const modalState = reactive<{
 
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
-const items = ref<AssignmentItemProps[]>([]);
+const items = ref<AssignmentItemProps[]>([
+  {
+    id: 1,
+    deadline: new Date().toLocaleString(),
+    maxPoints: 20,
+    title: "Project Phase 3",
+    lastUpdated: new Date().toLocaleString(),
+    fileUrls: [
+      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
+      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
+    ],
+    visible: true,
+    description: "This is the assignment for the third project phase",
+    submissions: 3,
+    submissionsLeft: 2,
+  },
+  {
+    id: 2,
+    deadline: new Date().toLocaleString(),
+    maxPoints: 20,
+    title: "Assignment #3",
+    lastUpdated: new Date().toLocaleString(),
+    fileUrls: [
+      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
+      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
+    ],
+    visible: true,
+    description: "This is the assignment for the third project phase",
+    submissions: "No limit",
+  },
+]);
 
 function deleteItem(itemID: number) {
   // display the confirmation dialog
@@ -92,12 +122,13 @@ function showModal() {
         ><span
           ><NIcon class="t-mr-3" size="20"
             ><Icon><AddCircle24Filled></AddCircle24Filled></Icon></NIcon></span
-        ><span>Add new content</span></NButton
+        ><span>New Assignment</span></NButton
       >
       <NDivider class="t-hidden md:t-flex"></NDivider>
     </template>
     <!-- main card content -->
-    <div>
+
+    <div class="t-columns-1 lg:t-columns-2">
       <template v-for="item in items" :key="item.id">
         <AssignmentItem
           :id="item.id"
@@ -107,6 +138,10 @@ function showModal() {
           :description="item.description"
           :title="item.title"
           :lastUpdated="item.lastUpdated"
+          :visible="item.visible"
+          :file-urls="item.fileUrls"
+          :submissions="item.submissions"
+          :submissions-left="item.submissionsLeft"
         />
       </template>
     </div>

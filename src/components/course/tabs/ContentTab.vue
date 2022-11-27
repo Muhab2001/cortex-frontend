@@ -33,7 +33,7 @@
         ><span
           ><NIcon class="t-mr-3" size="20"
             ><Icon><AddCircle24Filled></AddCircle24Filled></Icon></NIcon></span
-        ><span>Add new content</span></NButton
+        ><span>New content</span></NButton
       >
       <NDivider class="t-hidden md:t-flex"></NDivider>
     </template>

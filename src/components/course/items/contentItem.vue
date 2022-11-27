@@ -2,7 +2,14 @@
 import type { FileType } from "@/enums/fileTypes";
 import { Delete24Filled, Edit16Filled, Folder24Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
-import { NButton, NCard, NEllipsis, NIcon, useDialog } from "naive-ui";
+import {
+  NButton,
+  NCard,
+  NDivider,
+  NEllipsis,
+  NIcon,
+  useDialog,
+} from "naive-ui";
 import { h, type Component, ref, reactive, watch, computed } from "vue";
 import FileAttachement from "@/components/utils/fileAttachement.vue";
 import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
@@ -84,7 +91,8 @@ function deleteFile(fileURL: string) {
   <NCard
     hoverable
     class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer"
-    content-style="display:flex; align-items: center; padding: 12px; flex-direction: column"
+    content-style="display:flex; align-items: center; padding: 12px; flex-direction: column; padding-bottom: 1px"
+    footer-style="padding-bottom: 6px"
   >
     <div name="text-content" class="t-w-full">
       <span
@@ -142,16 +150,10 @@ function deleteFile(fileURL: string) {
         </span>
         <NEllipsis
           line-clamp="3"
-          class="t-text-md t-text-slate-500"
+          class="t-text-sm t-text-slate-500"
           v-if="itemState.description"
           name="item-description"
           >{{ itemState.description }}</NEllipsis
-        >
-        <span
-          :class="`t-font-medium ${
-            itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
-          }`"
-          >{{ itemState.lastUpdated }}</span
         >
       </span>
     </div>
@@ -167,6 +169,18 @@ function deleteFile(fileURL: string) {
         :active="itemState.visible"
       />
     </div>
+    <template #footer
+      ><div class="t-flex t-flex-wrap">
+        <NDivider class="t-py-0 t-my-1"></NDivider>
+        <span class="t-font-thin t-mr-2">Last Updated </span>
+        <span
+          :class="`t-font-medium ${
+            itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
+          }`"
+          >{{ itemState.lastUpdated }}</span
+        >
+      </div>
+    </template>
   </NCard>
 </template>
 

@@ -88,7 +88,7 @@ const submitForm = () => {
 
 <template>
   <main
-    class="t-w-full t-flex t-flex-col t-items-center t-justify-center t-h-full"
+    class="t-w-full t-flex t-flex-col t-items-center t-justify-center t-mb-10 t-h-full t-min-h-[90vh]"
   >
     <header class="t-flex-col t-items-center t-text-center">
       <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">Cortex</h1>

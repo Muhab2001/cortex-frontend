@@ -96,7 +96,7 @@ onMounted(() => {
           <div class="t-flex t-mb-3 t-items-center">
             <span
               class="t-bg-red-200 t-p-2 t-inline-flex t-items-center t-rounded-md t-h-full t-mr-2"
-              ><Icon size="20px" color="850E35"><Timer24Filled /> </Icon
+              ><Icon size="20px" color="#850E35"><Timer24Filled /> </Icon
             ></span>
             <h3
               class="t-font-bold t-text-slate-700 t-inline t-h-full t-align-middle"
@@ -108,7 +108,7 @@ onMounted(() => {
             <DeadlineCard
               course-id="SWE363"
               course-name="Web Engineeering"
-              :deadline="new Date('2022-11-10T23:15:00')"
+              :deadline="new Date('2022-11-27T23:15:00')"
               :original-date="new Date('2022-11-08T10:00:00')"
               title="Project Phase 3"
               section-no="Common"

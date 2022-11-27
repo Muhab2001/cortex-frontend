@@ -13,8 +13,10 @@ const route = useRoute();
 </script>
 
 <template>
-  <div class="t-px-3 t-py-4 md:t-px-4 md:t-py-8">
-    <NConfigProvider style="width: 100%; margin: 0; height: 100%">
+  <div class="t-px-3 t-py-4 md:t-px-4 md:t-py-8 t-min-h-[100vh]">
+    <NConfigProvider
+      style="width: 100%; margin: 0; height: 100%; min-height: 100vh"
+    >
       <NMessageProvider style="width: 100vw; height: 100%">
         <NDialogProvider>
           <header
