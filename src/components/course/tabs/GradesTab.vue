@@ -66,7 +66,7 @@ const items = ref<GradeItemProps[]>([
     lastUpdated: new Date().toLocaleString(),
     title: "Homework #2",
     comment:
-      "Your code is not working. Please test your code in later assigments",
+      "Your code is not working. Please test your code in later assignments. Good luck :-)",
     score: 4,
     maxPoints: 10,
   },

@@ -16,7 +16,13 @@
           cover-url="https://images.unsplash.com/photo-1597852074816-d933c7d2b988?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8ZGF0YWJhc2VzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60"
           :section-num="courseInfo.sectionNo"
           instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
-        />
+        /><NButton
+          v-if="auth.userProfile.role == Role.INSTRUCTOR"
+          class="t-w-full"
+          type="primary"
+          ><template #icon><NIcon :component="CoPresentRound" /></template> Take
+          Attendance</NButton
+        >
         <!-- options menu -->
         <section class="t-hidden md:t-flex">
           <NButtonGroup vertical class="t-w-full">
@@ -29,7 +35,7 @@
             />
           </NButtonGroup>
         </section>
-        <div
+        <section
           class="md:t-hidden t-border-t-2 t-border-t-solid t-shadow-2xl t-bg-white t-fixed t-bottom-0 t-left-0 t-z-50 t-h-fit t-w-full"
         >
           <NButtonGroup class="t-mx-auto t-px-2 t-bg-white t-w-full">
@@ -41,7 +47,7 @@
               :is-current="tab === option.label"
             />
           </NButtonGroup>
-        </div>
+        </section>
       </aside>
       <!-- main items -->
       <section class="t-columns-1 t-w-full md:t-w-[60%] lg:t-w-[70%]">
@@ -90,7 +96,8 @@ import {
   reactive,
 } from "vue";
 import { useBreadCrumb } from "@/stores/breadcrump";
-import { NButtonGroup, NCard } from "naive-ui";
+import { NButtonGroup, NButton, NIcon } from "naive-ui";
+import { CoPresentRound } from "@vicons/material";
 
 const InstructorSlot = defineAsyncComponent(
   () => import("./slots/InstructorSlot.vue")

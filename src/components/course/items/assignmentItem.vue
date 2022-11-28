@@ -1,117 +1,3 @@
-<script setup lang="ts">
-import FileAttachement from "@/components/utils/fileAttachement.vue";
-import { useIcon } from "@/composables/useIcon";
-import type { FileType } from "@/enums/fileTypes";
-import {
-  CheckboxChecked20Filled,
-  CheckboxCheckedSync16Filled,
-  Clock16Filled,
-  Delete24Filled,
-  Edit16Filled,
-  ErrorCircle24Filled,
-  List28Filled,
-  Star20Filled,
-} from "@vicons/fluent";
-import { AssignmentRound } from "@vicons/material";
-import { Icon } from "@vicons/utils";
-import {
-  NButton,
-  NDivider,
-  useDialog,
-  NCard,
-  NIcon,
-  NTag,
-  NSpace,
-} from "naive-ui";
-import { computed, reactive, ref } from "vue";
-import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
-import { CheckmarkCircle } from "@vicons/ionicons5";
-
-interface AssignmentItemProps {
-  id: number;
-  title: string;
-  description?: string;
-  lastUpdated: string;
-  editable: boolean;
-  submissions?: number; // an instructor view does not contain the submission count
-  submissionsLeft?: number;
-  isSubmitted: boolean;
-  isUnlimited: boolean;
-  deadline: number;
-  fileUrls: string[];
-  maxPoints: number;
-  visible: boolean;
-}
-
-const props = defineProps<AssignmentItemProps>();
-const emits = defineEmits<{
-  (e: "delete", id: number): void;
-  (
-    e: "edit",
-    item: Omit<AssignmentItemProps, "editable" | "lastUpdated">
-  ): void;
-}>();
-const dialog = useDialog();
-const itemFiles = ref<string[]>(props.fileUrls);
-
-const iconUtils = useIcon();
-
-const itemState = reactive<AssignmentItemProps>({ ...props });
-
-const headerIcon = computed(() =>
-  iconUtils.renderIcon(AssignmentRound, {
-    color: itemState.visible ? "#F49D1A" : "grey",
-    size: "24",
-  })
-);
-
-// TODO: supply functions that trigger deletion or editing of content files
-
-function updateFiles() {
-  // TODO: open a popup to edit the files
-}
-
-function editItem() {
-  emits("edit", {
-    title: itemState.title,
-    description: itemState.description,
-    id: props.id,
-    fileUrls: itemState.fileUrls,
-    visible: itemState.visible,
-    deadline: itemState.deadline,
-    isUnlimited: itemState.isUnlimited,
-    isSubmitted: itemState.isSubmitted,
-    maxPoints: itemState.maxPoints,
-  });
-}
-
-function toggleContentForSection() {
-  itemState.visible = !itemState.visible;
-}
-
-function toggleContentForAll() {
-  itemState.visible = !itemState.visible;
-  // TODO: api call to toggle all other items in the same group
-}
-
-function deleteFile(fileURL: string) {
-  // fire a confirmation modal, and delete on confirmation
-  dialog.warning({
-    title: "Delete a file",
-    content: "Are you sure you would like to delete the file?",
-    positiveText: "Confirm",
-    negativeText: "Cancel",
-    maskClosable: true,
-    onPositiveClick: () => {
-      itemFiles.value = itemFiles.value.filter((url) => url !== fileURL);
-    },
-    onMaskClick: () => {},
-    onEsc: () => {},
-  });
-  // on confirmation, remove the delete object from the state, and call the DELETE method on the endpoint
-}
-</script>
-
 <template>
   <NCard
     hoverable
@@ -302,6 +188,7 @@ function deleteFile(fileURL: string) {
     <template v-if="props.editable">
       <NDivider class="t-py-0 t-my-1"></NDivider>
       <NButton
+        @click="router.push(`/grade/${props.id}`)"
         icon-placement="left"
         type="warning"
         class="t-w-full t-my-2 t-flex t-items-center"
@@ -310,6 +197,30 @@ function deleteFile(fileURL: string) {
         </template>
 
         Grade Submissions</NButton
+      >
+    </template>
+    <template v-else>
+      <NDivider class="t-py-0 t-my-1"></NDivider>
+      <NButton
+        @click="
+          $emit('submit', {
+            title: props.title,
+            description: props.description,
+            id: props.id,
+          })
+        "
+        :disabled="
+          itemState.submissionsLeft === 0 ||
+          new Date(props.deadline).getTime() < Date.now()
+        "
+        icon-placement="left"
+        type="primary"
+        class="t-w-full t-my-2 t-flex t-items-center"
+        ><template #icon>
+          <NIcon :component="Star20Filled" />
+        </template>
+
+        New Submission</NButton
       >
     </template>
 
@@ -327,5 +238,127 @@ function deleteFile(fileURL: string) {
     </template>
   </NCard>
 </template>
+<script setup lang="ts">
+import FileAttachement from "@/components/utils/fileAttachement.vue";
+import { useIcon } from "@/composables/useIcon";
+import type { FileType } from "@/enums/fileTypes";
+import {
+  CheckboxChecked20Filled,
+  CheckboxCheckedSync16Filled,
+  Clock16Filled,
+  Delete24Filled,
+  Edit16Filled,
+  ErrorCircle24Filled,
+  List28Filled,
+  Star20Filled,
+} from "@vicons/fluent";
+import { AssignmentRound } from "@vicons/material";
+import { Icon } from "@vicons/utils";
+import {
+  NButton,
+  NDivider,
+  useDialog,
+  NCard,
+  NIcon,
+  NTag,
+  NSpace,
+  NEllipsis,
+} from "naive-ui";
+import { computed, reactive, ref } from "vue";
+import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
+import { CheckmarkCircle } from "@vicons/ionicons5";
+import { useRouter } from "vue-router";
+
+interface AssignmentItemProps {
+  id: number;
+  title: string;
+  description?: string;
+  lastUpdated: string;
+  editable: boolean;
+  submissions?: number; // an instructor view does not contain the submission count
+  submissionsLeft?: number;
+  isSubmitted: boolean;
+  isUnlimited: boolean;
+  deadline: number;
+  fileUrls: string[];
+  maxPoints: number;
+  visible: boolean;
+}
+
+const props = defineProps<AssignmentItemProps>();
+const emits = defineEmits<{
+  (e: "delete", id: number): void;
+  (
+    e: "edit",
+    item: Omit<AssignmentItemProps, "editable" | "lastUpdated">
+  ): void;
+  (
+    e: "submit",
+    title: string,
+    assignmentId: number,
+    description?: string
+  ): void;
+}>();
+const dialog = useDialog();
+const itemFiles = ref<string[]>(props.fileUrls);
+
+const iconUtils = useIcon();
+const router = useRouter();
+
+const itemState = reactive<AssignmentItemProps>({ ...props });
+
+const headerIcon = computed(() =>
+  iconUtils.renderIcon(AssignmentRound, {
+    color: itemState.visible ? "#F49D1A" : "grey",
+    size: "24",
+  })
+);
+
+// TODO: supply functions that trigger deletion or editing of content files
+
+function updateFiles() {
+  // TODO: open a popup to edit the files
+}
+
+function editItem() {
+  emits("edit", {
+    title: itemState.title,
+    description: itemState.description,
+    id: props.id,
+    fileUrls: itemState.fileUrls,
+    visible: itemState.visible,
+    deadline: itemState.deadline,
+    isUnlimited: itemState.isUnlimited,
+    isSubmitted: itemState.isSubmitted,
+    maxPoints: itemState.maxPoints,
+  });
+}
+
+function toggleContentForSection() {
+  itemState.visible = !itemState.visible;
+}
+
+function toggleContentForAll() {
+  itemState.visible = !itemState.visible;
+  // TODO: api call to toggle all other items in the same group
+}
+
+function deleteFile(fileURL: string) {
+  // fire a confirmation modal, and delete on confirmation
+  dialog.warning({
+    title: "Delete a file",
+    content: "Are you sure you would like to delete the file?",
+    positiveText: "Confirm",
+    negativeText: "Cancel",
+    maskClosable: true,
+    onPositiveClick: () => {
+      itemFiles.value = itemFiles.value.filter((url) => url !== fileURL);
+    },
+    onMaskClick: () => {},
+    onEsc: () => {},
+  });
+  // on confirmation, remove the delete object from the state, and call the DELETE method on the endpoint
+}
+</script>
 
 <style></style>

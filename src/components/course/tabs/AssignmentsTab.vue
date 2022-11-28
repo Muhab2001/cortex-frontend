@@ -12,6 +12,7 @@ import {
 } from "@vicons/fluent";
 import { NCard, NButton, NDivider, NIcon, useDialog } from "naive-ui";
 import AssignmentModal from "../utils/AssignmentModal.vue";
+import SubmissionModal from "../utils/SubmissionModal.vue";
 interface SectionTabProps {
   sectionId: number;
   role: Role;
@@ -30,13 +31,23 @@ interface EditedItemProps {
 }
 
 const dialog = useDialog();
-const modalState = reactive<{
+const assignmentModalState = reactive<{
   visible: boolean;
   mode: "create" | "edit";
   editedItem?: EditedItemProps;
 }>({
   visible: false,
   mode: "create",
+});
+const submissionModalState = reactive<{
+  visible: boolean;
+  assignmentId: number;
+  title: string;
+  description?: string;
+}>({
+  visible: false,
+  assignmentId: -1,
+  title: "",
 });
 
 const props = defineProps<SectionTabProps>();
@@ -94,30 +105,47 @@ function deleteItem(itemID: number) {
 }
 
 function updateItem(item: EditedItemProps) {
-  modalState.mode = "edit";
-  modalState.editedItem = item;
-  modalState.visible = true;
+  assignmentModalState.mode = "edit";
+  assignmentModalState.editedItem = item;
+  assignmentModalState.visible = true;
 }
 
-function showModal() {
-  modalState.mode = "create";
-  modalState.visible = true;
+function showAssignmentModal() {
+  assignmentModalState.mode = "create";
+  assignmentModalState.visible = true;
+}
+
+function showSubmissionModal(
+  title: string,
+  assignmnentId: number,
+  description?: string
+) {
+  submissionModalState.title = title;
+  submissionModalState.description = description;
+  submissionModalState.assignmentId = assignmnentId;
+  submissionModalState.visible = true;
 }
 </script>
 <template>
   <AssignmentModal
-    :mode="modalState.mode"
-    :visible="modalState.visible"
-    :target-item="modalState.editedItem"
+    :v-if="props.role == Role.INSTRUCTOR"
+    :mode="assignmentModalState.mode"
+    :visible="assignmentModalState.visible"
+    :target-item="assignmentModalState.editedItem"
     @closed="
       () => {
-        modalState.visible = false;
+        assignmentModalState.visible = false;
       }
     "
   />
+  <SubmissionModal
+    :v-if="props.role == Role.STUDENT"
+    v-bind="submissionModalState"
+    @closed="submissionModalState.visible = false"
+  />
   <NCard
     content-style="padding: 16px 8px; padding-top:0"
-    header-style="padding-bottom: 0"
+    header-style="padding-bottom: 0; padding-right: 0; padding-left: 0"
   >
     <!-- tab header -->
     <template #header>
@@ -132,7 +160,7 @@ function showModal() {
         <span class="t-text-lg t-font-semibold">Assignments</span>
       </div>
       <NButton
-        @click="showModal"
+        @click="showAssignmentModal"
         class="t-w-full t-mt-0 md:t-mt-3 t-mb-5 md:t-mb-0"
         type="info"
         ><span
@@ -148,6 +176,8 @@ function showModal() {
       <template v-for="item in items" :key="item.id">
         <AssignmentItem
           @edit="updateItem"
+          @delete="deleteItem"
+          @submit="showSubmissionModal"
           :id="item.id"
           :deadline="item.deadline"
           :editable="props.role == Role.INSTRUCTOR"
