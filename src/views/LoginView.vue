@@ -88,6 +88,7 @@ const submitForm = () => {
 
 <template>
   <main
+    @keyup.enter.exact="submitForm"
     class="t-w-full t-flex t-flex-col t-items-center t-justify-center t-mb-10 t-h-full t-min-h-[90vh]"
   >
     <header class="t-flex-col t-items-center t-text-center">

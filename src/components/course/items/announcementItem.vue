@@ -37,7 +37,7 @@ const itemState = reactive<AnnouncementItemProps>({ ...props });
 const headerIcon = computed(() =>
   iconUtils.renderIcon(Envelope, {
     color: itemState.visible ? "#F49D1A" : "grey",
-    size: "20",
+    size: "24",
   })
 );
 // TODO: supply functions that trigger deletion or editing of content files
@@ -83,10 +83,10 @@ function toggleContentForAll() {
       >
         <span
           name="item-title"
-          class="t-h-full t-inline-flex t-items-center t-justify-between t-w-full t-mb-0"
+          class="t-h-full t-inline-flex t-items-center t-justify-between t-w-full t-mb-2"
         >
           <span name="item-text-title" class="t-inline-flex t-items-center">
-            <span class="t-mr-2 t-h-full t-flex t-items-center"
+            <span class="t-mr-3 t-h-full t-flex t-items-center"
               ><headerIcon></headerIcon></span
             ><NEllipsis
               expand-trigger="click"

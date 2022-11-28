@@ -27,9 +27,12 @@ export interface ContentItemProps extends baseItemProps {
   fileUrls: string[];
 }
 
-export interface GradeItemProps extends baseItemProps {
+// the grade item is only shown for students
+export interface GradeItemProps
+  extends Omit<baseItemProps, "description" | "visible"> {
   score?: number;
-  assignmentId: number;
+  maxPoints: number;
+  comment?: string;
 }
 
 export interface AnnouncementItemProps extends baseItemProps {
@@ -37,11 +40,13 @@ export interface AnnouncementItemProps extends baseItemProps {
 }
 
 export interface AssignmentItemProps extends baseItemProps {
-  deadline: string;
+  deadline: number;
   maxPoints: number;
-  submissions: number | string;
+  submissions?: number;
   submissionsLeft?: number;
   fileUrls: string[];
+  isSubmitted: boolean;
+  isUnlimited: boolean;
 }
 
 export type Editable<T> = T & { editable: boolean };

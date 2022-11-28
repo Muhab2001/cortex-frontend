@@ -11,6 +11,7 @@ import {
   ClipboardBulletListLtr20Filled,
 } from "@vicons/fluent";
 import { NCard, NButton, NDivider, NIcon, useDialog } from "naive-ui";
+import AssignmentModal from "../utils/AssignmentModal.vue";
 interface SectionTabProps {
   sectionId: number;
   role: Role;
@@ -20,10 +21,12 @@ interface EditedItemProps {
   id: number;
   title: string;
   description?: string;
-  deadline: string;
+  deadline: number;
   maxPoints: number;
+  submissions?: number;
   fileUrls: string[];
   visible: boolean;
+  isUnlimited: boolean;
 }
 
 const dialog = useDialog();
@@ -41,7 +44,7 @@ const props = defineProps<SectionTabProps>();
 const items = ref<AssignmentItemProps[]>([
   {
     id: 1,
-    deadline: new Date().toLocaleString(),
+    deadline: Date.now(),
     maxPoints: 20,
     title: "Project Phase 3",
     lastUpdated: new Date().toLocaleString(),
@@ -53,10 +56,12 @@ const items = ref<AssignmentItemProps[]>([
     description: "This is the assignment for the third project phase",
     submissions: 3,
     submissionsLeft: 2,
+    isSubmitted: true,
+    isUnlimited: false,
   },
   {
     id: 2,
-    deadline: new Date().toLocaleString(),
+    deadline: Date.now(),
     maxPoints: 20,
     title: "Assignment #3",
     lastUpdated: new Date().toLocaleString(),
@@ -66,7 +71,8 @@ const items = ref<AssignmentItemProps[]>([
     ],
     visible: true,
     description: "This is the assignment for the third project phase",
-    submissions: "No limit",
+    isUnlimited: true,
+    isSubmitted: false,
   },
 ]);
 
@@ -99,6 +105,16 @@ function showModal() {
 }
 </script>
 <template>
+  <AssignmentModal
+    :mode="modalState.mode"
+    :visible="modalState.visible"
+    :target-item="modalState.editedItem"
+    @closed="
+      () => {
+        modalState.visible = false;
+      }
+    "
+  />
   <NCard
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0"
@@ -131,6 +147,7 @@ function showModal() {
     <div class="t-columns-1 lg:t-columns-2">
       <template v-for="item in items" :key="item.id">
         <AssignmentItem
+          @edit="updateItem"
           :id="item.id"
           :deadline="item.deadline"
           :editable="props.role == Role.INSTRUCTOR"
@@ -142,6 +159,8 @@ function showModal() {
           :file-urls="item.fileUrls"
           :submissions="item.submissions"
           :submissions-left="item.submissionsLeft"
+          :is-submitted="item.isSubmitted"
+          :is-unlimited="item.isUnlimited"
         />
       </template>
     </div>

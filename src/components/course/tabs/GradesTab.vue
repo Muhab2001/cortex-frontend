@@ -1,47 +1,75 @@
-<script setup lang="ts">
-import { ref } from "vue";
-import type { GradeItemProps } from "typings/CourseViewTabs";
-import GradeItem from "../items/GradeItem.vue";
-import { Role } from "@/enums/roles";
-import { Icon } from "@vicons/utils";
-import { Star20Filled } from "@vicons/fluent";
-
-interface SectionTabProps {
-  sectionId: number;
-  role: Role;
-}
-
-const props = defineProps<SectionTabProps>();
-// TODO initialize according to given params
-const items = ref<GradeItemProps[]>([]);
-</script>
 <template>
-  <NCard>
+  <NCard
+    content-style="padding: 16px 8px; padding-top:0"
+    header-style="padding-bottom: 0"
+  >
     <!-- tab header -->
     <template #header>
-      <div>
+      <div class="t-hidden md:t-visible md:t-flex t-items-center">
         <!-- icon -->
-        <span class="t-bg-[#ffee57]"
-          ><Icon color="#da9351"> <Star20Filled></Star20Filled> </Icon
+        <span
+          class="t-h-full t-inline-flex t-justify-center t-p-2 t-items-center t-rounded-md t-mr-3 t-bg-[#ffee57]"
+          ><Icon size="25" color="#da9351"> <Star20Filled></Star20Filled> </Icon
         ></span>
         <!-- the header -->
-        <span>Grades</span>
+        <span class="t-text-lg t-font-semibold">Grades</span>
       </div>
+      <NDivider class="t-hidden md:t-flex"></NDivider>
     </template>
     <!-- main card content -->
-    <div>
+    <div class="t-columns-1 lg:t-columns-2">
       <template v-for="item in items" :key="item.id">
         <GradeItem
           :id="item.id"
-          :editable="props.role == Role.INSTRUCTOR"
-          :description="item.description"
           :title="item.title"
           :lastUpdated="item.lastUpdated"
           :score="item.score"
-          :assignmentId="item.assignmentId"
+          :maxScore="item.maxPoints"
+          :comment="item.comment"
         />
       </template>
     </div>
   </NCard>
 </template>
+<script setup lang="ts">
+import { ref } from "vue";
+import type { GradeItemProps } from "typings/CourseViewTabs";
+import GradeItem from "../items/GradeItem.vue";
+import { Icon } from "@vicons/utils";
+import { Star20Filled } from "@vicons/fluent";
+import { NCard, NDivider } from "naive-ui";
+
+interface SectionTabProps {
+  sectionId: number;
+}
+
+const props = defineProps<SectionTabProps>();
+// TODO initialize according to given params
+const items = ref<GradeItemProps[]>([
+  {
+    id: 1,
+    lastUpdated: new Date().toLocaleString(),
+    title: "Project Phase #2",
+    score: 20,
+    maxPoints: 20,
+    comment: "Well done Muhab, this assignment submission was splendid!",
+  },
+  {
+    id: 2,
+    lastUpdated: new Date().toLocaleString(),
+    title: "Project Phase #3",
+    score: 13,
+    maxPoints: 20,
+  },
+  {
+    id: 3,
+    lastUpdated: new Date().toLocaleString(),
+    title: "Homework #2",
+    comment:
+      "Your code is not working. Please test your code in later assigments",
+    score: 4,
+    maxPoints: 10,
+  },
+]);
+</script>
 <style></style>

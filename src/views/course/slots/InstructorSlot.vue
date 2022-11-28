@@ -12,6 +12,7 @@
       :section-id="props.sectionId"
     />
   </template>
+  <!-- Delete the conditional rendering clause -->
   <template v-if="props.tab === 'Grades'">
     <GradesTab :role="auth.userProfile.role" :section-id="props.sectionId" />
   </template>

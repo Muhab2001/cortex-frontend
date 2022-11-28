@@ -172,12 +172,7 @@ const options: CourseOption[] = [
     iconFill: "#4ECB71",
     icon: ClipboardBulletListLtr20Filled,
   },
-  {
-    label: "Grades",
-    iconBG: "t-bg-[#ffee57]",
-    iconFill: "#da9351",
-    icon: Star20Filled,
-  },
+
   {
     label: "Announcements",
     iconBG: "t-bg-[#ffb13b]",
@@ -186,6 +181,17 @@ const options: CourseOption[] = [
     extraOptions: { style: "padding-left: 0.25rem; " },
   },
 ];
+
+// instructor can access the grades through the assignment page
+// TODO: revert to students' only view
+// if (true) {
+options.push({
+  label: "Grades",
+  iconBG: "t-bg-[#ffee57]",
+  iconFill: "#da9351",
+  icon: Star20Filled,
+});
+// }
 
 function switchTab(label: string): void {
   console.log("FINALLY!", tab.value);

@@ -5,13 +5,14 @@ import type { FileType } from "@/enums/fileTypes";
 import {
   CheckboxChecked20Filled,
   CheckboxCheckedSync16Filled,
-  CheckboxCheckedSync16Regular,
   Clock16Filled,
   Delete24Filled,
   Edit16Filled,
-  Folder24Filled,
+  ErrorCircle24Filled,
+  List28Filled,
+  Star20Filled,
 } from "@vicons/fluent";
-import { AssignmentSharp } from "@vicons/material";
+import { AssignmentRound } from "@vicons/material";
 import { Icon } from "@vicons/utils";
 import {
   NButton,
@@ -22,7 +23,6 @@ import {
   NTag,
   NSpace,
 } from "naive-ui";
-import type { ContentItemProps } from "typings/CourseViewTabs";
 import { computed, reactive, ref } from "vue";
 import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
 import { CheckmarkCircle } from "@vicons/ionicons5";
@@ -33,9 +33,11 @@ interface AssignmentItemProps {
   description?: string;
   lastUpdated: string;
   editable: boolean;
-  submissions: number | string; // an instructor view does not contain the submission count
+  submissions?: number; // an instructor view does not contain the submission count
   submissionsLeft?: number;
-  deadline: string;
+  isSubmitted: boolean;
+  isUnlimited: boolean;
+  deadline: number;
   fileUrls: string[];
   maxPoints: number;
   visible: boolean;
@@ -44,7 +46,10 @@ interface AssignmentItemProps {
 const props = defineProps<AssignmentItemProps>();
 const emits = defineEmits<{
   (e: "delete", id: number): void;
-  (e: "edit", item: Omit<ContentItemProps, "editable" | "lastUpdated">): void;
+  (
+    e: "edit",
+    item: Omit<AssignmentItemProps, "editable" | "lastUpdated">
+  ): void;
 }>();
 const dialog = useDialog();
 const itemFiles = ref<string[]>(props.fileUrls);
@@ -54,7 +59,7 @@ const iconUtils = useIcon();
 const itemState = reactive<AssignmentItemProps>({ ...props });
 
 const headerIcon = computed(() =>
-  iconUtils.renderIcon(AssignmentSharp, {
+  iconUtils.renderIcon(AssignmentRound, {
     color: itemState.visible ? "#F49D1A" : "grey",
     size: "24",
   })
@@ -73,6 +78,10 @@ function editItem() {
     id: props.id,
     fileUrls: itemState.fileUrls,
     visible: itemState.visible,
+    deadline: itemState.deadline,
+    isUnlimited: itemState.isUnlimited,
+    isSubmitted: itemState.isSubmitted,
+    maxPoints: itemState.maxPoints,
   });
 }
 
@@ -117,9 +126,12 @@ function deleteFile(fileURL: string) {
       >
         <span
           name="item-title"
-          class="t-h-full t-inline-flex t-items-center t-justify-between t-w-full t-mb-2"
+          class="t-h-full t-inline-flex t-items-center t-justify-between t-w-full t-mb-1"
         >
-          <span name="item-text-title" class="t-inline-flex t-items-center">
+          <span
+            name="item-text-title"
+            class="t-inline-flex t-items-center t-flex-wrap"
+          >
             <span class="t-mr-2 t-h-full t-flex t-items-center"
               ><headerIcon></headerIcon></span
             ><NEllipsis
@@ -130,10 +142,7 @@ function deleteFile(fileURL: string) {
             >
             <!-- TODO: add an if-statement to hide for students -->
             <NTag
-              v-if="
-                props.submissionsLeft &&
-                props.submissions > props.submissionsLeft
-              "
+              v-if="props.isSubmitted"
               type="success"
               :bordered="false"
               round
@@ -141,8 +150,26 @@ function deleteFile(fileURL: string) {
               Submitted
               <template #icon><NIcon :component="CheckmarkCircle" /></template>
             </NTag>
+            <NTag
+              v-if="
+                !props.isSubmitted &&
+                new Date(props.deadline).getTime() < Date.now()
+              "
+              type="error"
+              :bordered="false"
+              round
+            >
+              Expired
+              <template #icon
+                ><NIcon :component="ErrorCircle24Filled"
+              /></template>
+            </NTag>
           </span>
-          <span v-if="props.editable" name="editing-bar">
+          <span
+            class="t-inline-flex t-flex-nowrap"
+            v-if="props.editable"
+            name="editing-bar"
+          >
             <NButton
               class="t-mr-2"
               @click="$emit('delete', props.id)"
@@ -179,7 +206,7 @@ function deleteFile(fileURL: string) {
         </span>
         <NEllipsis
           line-clamp="3"
-          class="t-text-sm t-text-slate-500"
+          class="t-text-md t-text-slate-500 t-mb-2"
           v-if="itemState.description"
           name="item-description"
           >{{ itemState.description }}</NEllipsis
@@ -197,7 +224,15 @@ function deleteFile(fileURL: string) {
         :active="itemState.visible"
       />
     </div>
-    <NDivider title-placement="left" class="t-py-2 t-my-1">Details</NDivider>
+    <NDivider title-placement="left" class="t-py-2 t-my-1"
+      ><NIcon
+        size="22"
+        color="#2080f0"
+        :component="List28Filled"
+        class="t-mr-2"
+      />
+      <span class="t-text-gray-600 t-font-medium">Details</span></NDivider
+    >
 
     <NSpace
       name="assignment-specs"
@@ -225,10 +260,27 @@ function deleteFile(fileURL: string) {
           />
         </template>
         <span class="t-font-semibold t-text-dm t-mr-3">Submissions</span
-        ><span>{{ itemState.submissions }}</span>
+        ><span
+          v-if="itemState.submissions"
+          class="t-text-blue-500 t-font-medium"
+          >{{ itemState.submissions }}</span
+        >
+        <span v-else class="t-text-blue-500 t-font-medium">No Limit</span>
+      </NTag>
+      <NTag round size="large" class="t-flex t-items-center t-py-3">
+        <template #icon>
+          <NIcon
+            class="t-mx-1"
+            :component="Star20Filled"
+            :color="itemState.visible ? '#FED049' : 'grey'"
+            size="25"
+          />
+        </template>
+        <span class="t-font-semibold t-text-md t-mr-3">Max Points</span
+        ><span class="t-font-semibold">{{ itemState.maxPoints }}</span>
       </NTag>
       <NTag
-        v-if="props.submissionsLeft"
+        v-if="!props.isUnlimited"
         round
         size="large"
         class="t-flex t-items-center t-py-3"
@@ -242,9 +294,24 @@ function deleteFile(fileURL: string) {
           />
         </template>
         <span class="t-font-semibold t-text-dm t-mr-3">Submissions Left</span
-        ><span>{{ itemState.submissionsLeft }}</span>
+        ><span class="t-text-green-500 t-font-medium">{{
+          itemState.submissionsLeft
+        }}</span>
       </NTag>
     </NSpace>
+    <template v-if="props.editable">
+      <NDivider class="t-py-0 t-my-1"></NDivider>
+      <NButton
+        icon-placement="left"
+        type="warning"
+        class="t-w-full t-my-2 t-flex t-items-center"
+        ><template #icon>
+          <NIcon :component="Star20Filled" />
+        </template>
+
+        Grade Submissions</NButton
+      >
+    </template>
 
     <NDivider class="t-py-0 t-my-1"></NDivider>
     <template #footer
