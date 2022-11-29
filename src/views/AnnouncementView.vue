@@ -200,13 +200,13 @@ const submitForm = () => {
               <!-- course sections checkboxs -->
               <NCheckboxGroup :value="selectedSectionIds" @update:value="selectSectionsByArray">
                 <NSpace vertical size="small">
-                <NCheckbox
-                  v-for="section in course.sections"
-                  :key="section.sectionId"
-                  :value="section.sectionId"
-                  :label="'Section ' + section.sectionNumber"
-                  class="t-ml-6"
-                />
+                  <NCheckbox
+                    v-for="section in course.sections"
+                    :key="section.sectionId"
+                    :value="section.sectionId"
+                    :label="'Section ' + section.sectionNumber"
+                    class="t-ml-6"
+                  />
                 </NSpace>
               </NCheckboxGroup>
             </div>
