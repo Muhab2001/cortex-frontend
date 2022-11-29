@@ -1,6 +1,3 @@
-<!-- TODO: one big checkbox group and small checkbox group for each course -->
-<!-- TODO: function that adds and removes selected sections from the selectedSectionsIds reactive -->
-
 <script setup lang="ts">
 import axios from "axios";
 import {
@@ -54,6 +51,7 @@ const model = ref<AnnouncementModel>({
   tag: "",
 });
 
+// The variable containing the info that should be gotten from the database
 const courses = reactive<Course[]>([
     {
       courseId: "ICS110",
@@ -103,13 +101,8 @@ const selectSectionsByArray = (newSectionIds: (string | number)[]): void => {
   courses.forEach((course) => {
     // checking and unchecking of section checkboxs of this iteration's course
     course.sections.forEach((section) => {
-      if (newSectionIds.includes(section.sectionId)) {
-        section.selected = true;
-      }
-      else {
-        section.selected = false;
-      }
-    })
+        section.selected = newSectionIds.includes(section.sectionId);
+    });
 
     // unchecking of the course checkbox if needed
     if (!course.sections.every((section) => section.selected)) {
@@ -153,8 +146,6 @@ const submitForm = () => {
       }
     }
   );
-
-  
 };
 </script>
 
