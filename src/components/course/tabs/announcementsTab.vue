@@ -77,7 +77,7 @@ function showModal() {
 <template>
   <NCard
     content-style="padding: 16px 8px; padding-top:0"
-    header-style="padding-bottom: 0; padding-right: 0; padding-left: 0"
+    header-style="padding-bottom: 0;"
   >
     <!-- tab header -->
     <template #header>

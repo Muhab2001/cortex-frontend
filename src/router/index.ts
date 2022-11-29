@@ -23,7 +23,7 @@ const router = createRouter({
       props: true,
     },
     {
-      path: "/grade:assignmentId",
+      path: "/grade/:sectionId/:assignmentId",
       name: "grade",
       component: () => import("@/views/GradeView.vue"),
       props: true,

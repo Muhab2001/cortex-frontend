@@ -133,8 +133,8 @@
             size="25"
           />
         </template>
-        <span class="t-font-semibold t-text-dm t-mr-3">Deadline</span
-        ><span>{{ itemState.deadline }}</span>
+        <span class="t-font-semibold t-text-md t-mr-2">Deadline</span
+        ><span>{{ new Date(itemState.deadline).toLocaleString() }}</span>
       </NTag>
       <NTag round size="large" class="t-flex t-items-center t-py-3">
         <template #icon>
@@ -163,7 +163,9 @@
           />
         </template>
         <span class="t-font-semibold t-text-md t-mr-3">Max Points</span
-        ><span class="t-font-semibold">{{ itemState.maxPoints }}</span>
+        ><span class="t-font-semibold t-text-yellow-400">{{
+          itemState.maxPoints
+        }}</span>
       </NTag>
       <NTag
         v-if="!props.isUnlimited"
@@ -188,7 +190,7 @@
     <template v-if="props.editable">
       <NDivider class="t-py-0 t-my-1"></NDivider>
       <NButton
-        @click="router.push(`/grade/${props.id}`)"
+        @click="router.push(`/grade/${props.sectionId}/${props.id}`)"
         icon-placement="left"
         type="warning"
         class="t-w-full t-my-2 t-flex t-items-center"
@@ -271,6 +273,7 @@ import { useRouter } from "vue-router";
 
 interface AssignmentItemProps {
   id: number;
+  sectionId: number;
   title: string;
   description?: string;
   lastUpdated: string;
@@ -331,6 +334,7 @@ function editItem() {
     isUnlimited: itemState.isUnlimited,
     isSubmitted: itemState.isSubmitted,
     maxPoints: itemState.maxPoints,
+    sectionId: props.sectionId,
   });
 }
 

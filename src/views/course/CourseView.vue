@@ -22,7 +22,7 @@
           type="primary"
           ><template #icon><NIcon :component="CoPresentRound" /></template> Take
           Attendance</NButton
-        >
+        > 
         <!-- options menu -->
         <section class="t-hidden md:t-flex">
           <NButtonGroup vertical class="t-w-full">

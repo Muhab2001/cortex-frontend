@@ -145,7 +145,7 @@ function showSubmissionModal(
   />
   <NCard
     content-style="padding: 16px 8px; padding-top:0"
-    header-style="padding-bottom: 0; padding-right: 0; padding-left: 0"
+    header-style="padding-bottom: 0;"
   >
     <!-- tab header -->
     <template #header>
@@ -175,6 +175,7 @@ function showSubmissionModal(
     <div class="t-columns-1 lg:t-columns-2">
       <template v-for="item in items" :key="item.id">
         <AssignmentItem
+          :section-id="props.sectionId"
           @edit="updateItem"
           @delete="deleteItem"
           @submit="showSubmissionModal"

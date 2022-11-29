@@ -157,6 +157,7 @@ const rules: Ref<FormRules> = computed(() => ({
 
 // form submission handling
 // TODO: API communications
+
 function submitForm() {
   formRef.value?.validate(
     async (errors: Array<FormValidationError> | undefined) => {

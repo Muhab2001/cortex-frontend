@@ -1,7 +1,9 @@
 <template>
   <NModal
     :auto-focus="true"
-    :close-on-esc="true"
+    :on-esc-click="() => $emit('closed')"
+    :mask-closable="false"
+    :block-scroll="true"
     :trap-focus="true"
     :show="props.visible"
     :title="props.mode == 'edit' ? 'Edit Content' : 'Create Content'"
@@ -9,7 +11,7 @@
     content-style="padding-bottom: 0px"
     preset="card"
     class="t-w-[80%]"
-    @close="$emit('closed')"
+    @close="() => $emit('closed')"
     size="large"
   >
     <template #header>
@@ -166,15 +168,19 @@
           >
         </NSwitch>
       </NFormItem>
-      <NFormItem
-        class="t-pt-3"
-        label-placement="left"
-        v-if="!modelRef.isUnlimited"
-      >
-        <NInputNumber
-          v-model:value="modelRef.submissions"
-          placeholder="Enter the number of allowed submissions"
-      /></NFormItem>
+      <NCollapseTransition :show="!modelRef.isUnlimited">
+        <NFormItem
+          class="t-pt-3"
+          label-placement="left"
+          feedback="Specify the submission limit (1 or more)"
+        >
+          <NInputNumber
+            :default-value="1"
+            min="1"
+            v-model:value="modelRef.submissions"
+            placeholder="Enter the number of allowed submissions"
+        /></NFormItem>
+      </NCollapseTransition>
       <h2 class="t-font-semibold t-mb-0 t-mt-3">Attachements</h2>
       <p class="t-mb-0">Supply all needed files to solve the assignment</p>
 
@@ -229,6 +235,7 @@ import {
   NInputNumber,
   type FormValidationError,
   useMessage,
+  NCollapseTransition,
 } from "naive-ui";
 import {
   inject,
@@ -326,6 +333,7 @@ const rules: Ref<FormRules> = computed(() => ({
   },
   submissions: {
     required: modelRef.value.isUnlimited,
+    min: 1,
     type: "number",
     trigger: "blur",
     message:
