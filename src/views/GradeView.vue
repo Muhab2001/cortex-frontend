@@ -400,9 +400,10 @@ function saveGrades() {
             <NIcon :component="Save" />
           </template>
           Save Changes</NButton
-        >
-        <!-- ! parametrize the routing -->
-        <NButton
+        -->
+
+    <!-- ! parametrize the routing -->
+    <!-- <NButton
           class="t-flex-1 t-w-[90%] md:t-w-fit"
           strong
           secondary
@@ -412,7 +413,7 @@ function saveGrades() {
           <template #icon> <NIcon :component="Delete28Filled" /> </template>
           Cancel Changes
         </NButton>
-      </NButtonGroup>
+      </NButtonGroup> 
     </section> -->
     <section>
       <NDataTable
