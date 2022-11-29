@@ -39,14 +39,13 @@ interface LoggingModel {
 // state
 const model = ref<LoggingModel>({
   username: null,
-
   password: null,
 });
 
 const rules: FormRules = {
   username: {
     required: true,
-    message: "Please enter your clown name",
+    message: "Please enter your name",
     trigger: ["blur"],
   },
   password: {
