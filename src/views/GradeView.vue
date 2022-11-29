@@ -17,6 +17,7 @@ import { useIcon } from "@/composables/useIcon";
 import { Delete28Filled, ErrorCircle24Filled } from "@vicons/fluent";
 import { CheckmarkCircle, Save } from "@vicons/ionicons5";
 import { useBreadCrumb } from "@/stores/breadcrump";
+import GradeModal from "@/components/course/utils/GradeModal.vue";
 interface GradePageProps {
   assignmentId: number;
   sectionId: number;
@@ -223,6 +224,7 @@ breadcrumbs.updateOptions([
 function openGradeModal(row: GradeRecord) {
   gradeModalState.visible = true;
   gradeModalState.record = row;
+  gradeModalState.name = row.studentName;
 }
 
 const gradeType = (
@@ -360,9 +362,13 @@ function createColumns(): DataTableColumns<GradeRecord> {
 const gradeModalState = reactive<{
   visible: boolean;
   record: GradeRecord;
+  maxScore: number;
+  name: string;
 }>({
   visible: false,
   record: grade.records[0],
+  maxScore: grade.fullScore,
+  name: "",
 });
 
 function saveGrades() {
@@ -376,6 +382,16 @@ function saveGrades() {
 
 <template>
   <main class="t-pb-40 md:t-pb-0">
+    <GradeModal
+      :title="grade.title"
+      :assignment-id="props.assignmentId"
+      :student-id="gradeModalState.record.studentId"
+      :score="gradeModalState.record.score"
+      :visible="gradeModalState.visible"
+      @closed="gradeModalState.visible = false"
+      :max-score="gradeModalState.maxScore"
+      :name="gradeModalState.name"
+    />
     <header class="t-mb-4">
       <h2 id="assignment-title" class="t-font-semibold">{{ grade.title }}</h2>
       <p class="t-text-gray-400 t-font-medium" v-if="grade.description">

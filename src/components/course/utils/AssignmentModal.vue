@@ -176,9 +176,11 @@
         >
           <NInputNumber
             :default-value="1"
+            :precision="0"
             min="1"
             v-model:value="modelRef.submissions"
-            placeholder="Enter the number of allowed submissions"
+            placeholder="Enter the number of
+          allowed submissions"
         /></NFormItem>
       </NCollapseTransition>
       <h2 class="t-font-semibold t-mb-0 t-mt-3">Attachements</h2>
