@@ -1,3 +1,6 @@
+<!-- TODO: one big checkbox group and small checkbox group for each course -->
+<!-- TODO: function that adds and removes selected sections from the selectedSectionsIds reactive -->
+
 <script setup lang="ts">
 import axios from "axios";
 import {
@@ -13,7 +16,7 @@ import {
   type FormInst,
   type FormRules,
 } from "naive-ui";
-import { ref, computed } from "vue";
+import { ref, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
 
 // UI framwork logic
@@ -28,18 +31,20 @@ interface Section {
   sectionId: number,
   // actual section number to be displayed to the user
   sectionNumber: number,
+  selected: boolean,
 }
 
 interface Course {
+  // e.g. ICS104
   courseId: string,
   sections: Section[],
+  selected: boolean
 }
 
 interface AnnouncementModel {
   subject: string;
   content: string;
   tag: string;
-  courses: Course[];
 }
 
 // state
@@ -47,31 +52,43 @@ const model = ref<AnnouncementModel>({
   subject: "",
   content: "",
   tag: "",
-  courses: [
+});
+
+const courses = reactive<Course[]>([
     {
       courseId: "ICS110",
       sections:[
         {sectionId: 1,
-        sectionNumber: 1},
+        sectionNumber: 1,
+        selected: false},
         {sectionId: 2,
-        sectionNumber: 2}
-      ]
+        sectionNumber: 2,
+        selected: false}
+      ],
+      selected: false,
     },
     {
       courseId: "ICS210",
       sections:[
         {sectionId:3,
-        sectionNumber: 1},
+        sectionNumber: 1,
+        selected: false},
         {sectionId:4,
-        sectionNumber: 2},
-      ]
+        sectionNumber: 2,
+        selected: false},
+      ],
+      selected: false,
     }
-  ],
-});
+  ],)
 
-const courseIds = computed<string[]>(() => model.value.courses.map((e) => e.courseId));
+const selectedSectionIds = computed<(string | number)[]>(()=> {
+  let result: number[] = [];
+  courses.forEach((course) => {
+    result = result.concat(course.sections.filter((section) => section.selected).map((section) => section.sectionId));
+  });
+  return result;
+})
 
-const selectedSectionIds = ref<number[]>([]);
 
 const rules: FormRules = {
   subject: {
@@ -82,8 +99,33 @@ const rules: FormRules = {
 };
 
 // handlers
-const selectSection = () => {
+const selectSectionsByArray = (newSectionIds: (string | number)[]): void => {
+  courses.forEach((course) => {
+    // checking and unchecking of section checkboxs of this iteration's course
+    course.sections.forEach((section) => {
+      if (newSectionIds.includes(section.sectionId)) {
+        section.selected = true;
+      }
+      else {
+        section.selected = false;
+      }
+    })
 
+    // unchecking of the course checkbox if needed
+    if (!course.sections.every((section) => section.selected)) {
+      course.selected = false;
+    }
+  });
+} 
+
+const selectSectionsByCourse = (checkedCourse: Course): void => {
+  courses.forEach((course) => {
+    if (checkedCourse.courseId == course.courseId) {
+      course.selected = !course.selected;
+      course.sections.map((e)=> e.selected = course.selected);
+      return;
+    }
+  })
 }
 
 const submitForm = () => {
@@ -156,26 +198,24 @@ const submitForm = () => {
           />
         </NFormItem>
         <NFormItem label="Courses">
-          <!-- all courses checkbox group -->
-          <NCheckboxGroup v-model:value="selectedSectionIds" @update:value="selectSection">
-            <NSpace vertical size="medium">
-              <div v-for="course in model.courses" :key="course.courseId">
-                <!-- course checkbox -->
-                <NCheckbox :label="course.courseId" />
-                <NSpace vertical size="small">
-                  <!-- course sections checkboxs -->
+          <NSpace vertical size="medium">
+            <div v-for="course in courses" :key="course.courseId">
+              <!-- course checkbox -->
+              <NCheckbox :label="course.courseId" :checked="course.selected" @update:checked="selectSectionsByCourse(course)"/>
+              <NSpace vertical size="small">
+                <!-- course sections checkboxs -->
+                <NCheckboxGroup :value="selectedSectionIds" @update:value="selectSectionsByArray">
                   <NCheckbox
                     v-for="section in course.sections"
                     :key="section.sectionId"
                     :value="section.sectionId"
                     :label="'Section ' + section.sectionNumber"
                     class="t-ml-6"
-          
                   />
-                </NSpace>
-              </div>
-            </NSpace>
-          </NCheckboxGroup>
+                </NCheckboxGroup>
+              </NSpace>
+            </div>
+          </NSpace>
         </NFormItem>
         <NButton
           @click="submitForm"
