@@ -129,29 +129,32 @@ const selectSectionsByCourse = (checkedCourse: Course): void => {
 }
 
 const submitForm = () => {
-  console.log("HELLOOO!!");
+  console.log("Submitted");
 
-  // formRef.value?.validate(
-  //   async (errors: Array<FormValidationError> | undefined) => {
-  //     if (!errors) {
-  //       try {
-  //         router.push("/home");
-  //         console.log(
-  //           await axios.post("/login", {
-  //             username: model.value.username,
-  //             password: model.value.password,
-  //           })
-  //         );
-  //         messenger.success("Successful sign in!");
-  //       } catch (e: any) {
-  //         messenger.error("Login Failed!");
-  //       }
-  //     } else {
-  //       console.log(errors);
-  //       messenger.error("Login Failed!");
-  //     }
-  //   }
-  // );
+  formRef.value?.validate(
+    async (errors: Array<FormValidationError> | undefined) => {
+      if (!errors) {
+        // if no section is selected
+        if (selectedSectionIds.value.length == 0) {
+        messenger.error("Must select at least one section")
+        return;
+        }
+        messenger.success("Submission Successful");
+        // router.push("/home");
+        // console.log(
+        //   await axios.post("/login", {
+        //     username: model.value.username,
+        //     password: model.value.password,
+        //   })
+        // );
+      } else {
+        console.log(errors);
+        messenger.error("Submission Failed!");
+      }
+    }
+  );
+
+  
 };
 </script>
 
