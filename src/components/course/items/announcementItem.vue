@@ -12,16 +12,14 @@ import {
   NIcon,
 } from "naive-ui";
 import { computed, reactive } from "vue";
-import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
 
 interface AnnouncementItemProps {
   id: number;
-  title: string;
-  description?: string;
+  subject: string;
+  content: string;
   lastUpdated: string;
   editable: boolean;
   tag: string;
-  visible: boolean;
 }
 
 const props = defineProps<AnnouncementItemProps>();
@@ -36,7 +34,7 @@ const iconUtils = useIcon();
 const itemState = reactive<AnnouncementItemProps>({ ...props });
 const headerIcon = computed(() =>
   iconUtils.renderIcon(Envelope, {
-    color: itemState.visible ? "#F49D1A" : "grey",
+    color: "#F49D1A",
     size: "24",
   })
 );
@@ -51,21 +49,11 @@ function updateItem() {
 
 function editItem() {
   emits("edit", {
-    title: itemState.title,
-    description: itemState.description,
+    subject: itemState.subject,
+    content: itemState.content,
     id: props.id,
     tag: itemState.tag,
-    visible: itemState.visible,
   });
-}
-
-function toggleContentForSection() {
-  itemState.visible = !itemState.visible;
-}
-
-function toggleContentForAll() {
-  itemState.visible = !itemState.visible;
-  // TODO: api call to toggle all other items in the same group
 }
 </script>
 
@@ -73,7 +61,7 @@ function toggleContentForAll() {
   <NCard
     hoverable
     class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer"
-    content-style="display:flex; align-items: center; padding: 12px; flex-direction: column; padding-bottom: 1px"
+    content-style="display:flex; align-items: center; padding: 16px; flex-direction: column; padding-bottom: 1px"
     footer-style="padding-bottom: 6px"
   >
     <div name="text-content" class="t-w-full">
@@ -92,7 +80,7 @@ function toggleContentForAll() {
               expand-trigger="click"
               :line-clamp="1"
               class="t-font-semibold t-text-md"
-              >{{ itemState.title }}</NEllipsis
+              >{{ itemState.subject }}</NEllipsis
             >
           </span>
 
@@ -124,28 +112,21 @@ function toggleContentForAll() {
                 </Icon>
               </NIcon>
             </NButton>
-            <VisibilityDropdown
-              :visible="itemState.visible"
-              @group-toggle="toggleContentForAll"
-              @single-toggle="toggleContentForSection"
-            ></VisibilityDropdown>
           </span>
         </span>
         <div class="t-flex t-flex-wrap">
           <span
-            :class="`t-py-[0.2rem] t-px-1 t-rounded-sm t-text-xs t-mb-3 ${
-              itemState.visible ? 't-bg-pink-500' : 't-bg-gray-500'
-            } t-text-white t-mr-2`"
+            class="t-py-[0.2rem] t-px-1 t-rounded-sm t-text-xs t-mb-3 t-bg-pink-500 t-text-white t-mr-2"
             >{{ itemState.tag }}</span
           >
         </div>
         <NEllipsis
           line-clamp="3"
           class="t-text-md t-text-slate-500"
-          v-if="itemState.description"
+          v-if="itemState.content"
           expand-trigger="click"
           name="item-description"
-          >{{ itemState.description }}</NEllipsis
+          >{{ itemState.content }}</NEllipsis
         >
       </span>
     </div>
@@ -153,12 +134,9 @@ function toggleContentForAll() {
       ><div class="t-flex t-flex-wrap">
         <NDivider class="t-py-0 t-my-1"></NDivider>
         <span class="t-font-thin t-mr-2">Last Updated </span>
-        <span
-          :class="`t-font-medium ${
-            itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
-          }`"
-          >{{ itemState.lastUpdated }}</span
-        >
+        <span class="t-font-medium t-text-blue-400">{{
+          itemState.lastUpdated
+        }}</span>
       </div>
     </template>
   </NCard>

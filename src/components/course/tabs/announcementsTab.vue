@@ -7,6 +7,7 @@ import { Icon } from "@vicons/utils";
 import { Speaker032Filled, AddCircle24Filled } from "@vicons/fluent";
 import { NCard, useDialog, NButton, NDivider, NIcon } from "naive-ui";
 import type { Role } from "@/enums/roles";
+import AnnouncementModal from "../utils/AnnouncementModal.vue";
 
 interface SectionTabProps {
   sectionId: number;
@@ -15,10 +16,9 @@ interface SectionTabProps {
 
 interface EditedItemProps {
   id: number;
-  title: string;
-  description?: string;
+  subject: string;
+  content: string;
   tag: string;
-  visible: boolean;
 }
 
 const props = defineProps<SectionTabProps>();
@@ -40,7 +40,7 @@ const items = ref<AnnouncementItemProps[]>([
     lastUpdated: new Date().toLocaleString(),
     title: "Midterm Seating plan!",
     tag: "Seating plan",
-    visible: true,
+
     description:
       "You can find below the full seating plan for our midterm exam. It will be on Biulding 54 'Slaughtery house, at 7:00pm'",
   },
@@ -75,6 +75,12 @@ function showModal() {
 }
 </script>
 <template>
+  <AnnouncementModal
+    @closed="modalState.visible = false"
+    :visible="modalState.visible"
+    :mode="modalState.mode"
+    :target-item="modalState.editedItem"
+  />
   <NCard
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
@@ -112,13 +118,14 @@ function showModal() {
     <div class="t-columns-1">
       <template v-for="item in items" :key="item.id">
         <AnnouncementItem
+          @delete="deleteItem"
+          @edit="updateItem"
           editable
-          :description="item.description"
-          :title="item.title"
+          :content="item.description"
+          :subject="item.title"
           :lastUpdated="item.lastUpdated"
           :tag="item.tag"
           :id="item.id"
-          :visible="item.visible"
         />
       </template>
     </div>

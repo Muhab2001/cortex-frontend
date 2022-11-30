@@ -6,7 +6,7 @@
     :block-scroll="true"
     :trap-focus="true"
     :show="props.visible"
-    :title="props.mode == 'edit' ? 'Edit Content' : 'Create Content'"
+    :title="props.mode == 'edit' ? 'Edit Assignment' : 'Create Assignment'"
     transform-origin="center"
     content-style="padding-bottom: 0px"
     preset="card"
@@ -47,8 +47,8 @@
     <div class="t-font-semibold t-text-md t-pt-0">
       {{
         props.mode == "edit"
-          ? "Edit Content"
-          : "Fill the required fields to create a new content item"
+          ? "Edit Assignment"
+          : "Fill the required fields to create a new assignment"
       }}
     </div>
     <NForm class="t-mt-5" :model="modelRef" :rules="rules" ref="formRef">
@@ -374,7 +374,7 @@ watch(
           sections: [1, 2],
           visible: false,
           isUnlimited: false,
-          submissions: 0,
+          submissions: 1,
         };
       }
     }

@@ -35,7 +35,8 @@ export interface GradeItemProps
   comment?: string;
 }
 
-export interface AnnouncementItemProps extends baseItemProps {
+export interface AnnouncementItemProps extends Omit<baseItemProps, "visible"> {
+  description: string;
   tag: string;
 }
 

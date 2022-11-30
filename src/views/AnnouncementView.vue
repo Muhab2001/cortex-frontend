@@ -25,17 +25,17 @@ const router = useRouter();
 // interfaces
 interface Section {
   // database id
-  sectionId: number,
+  sectionId: number;
   // actual section number to be displayed to the user
-  sectionNumber: number,
-  selected: boolean,
+  sectionNumber: number;
+  selected: boolean;
 }
 
 interface Course {
   // e.g. ICS104
-  courseId: string,
-  sections: Section[],
-  selected: boolean
+  courseId: string;
+  sections: Section[];
+  selected: boolean;
 }
 
 interface AnnouncementModel {
@@ -53,40 +53,35 @@ const model = ref<AnnouncementModel>({
 
 // The variable containing the info that should be gotten from the database
 const courses = reactive<Course[]>([
-    {
-      courseId: "ICS110",
-      sections:[
-        {sectionId: 1,
-        sectionNumber: 1,
-        selected: false},
-        {sectionId: 2,
-        sectionNumber: 2,
-        selected: false}
-      ],
-      selected: false,
-    },
-    {
-      courseId: "ICS210",
-      sections:[
-        {sectionId:3,
-        sectionNumber: 1,
-        selected: false},
-        {sectionId:4,
-        sectionNumber: 2,
-        selected: false},
-      ],
-      selected: false,
-    }
-  ],)
+  {
+    courseId: "ICS110",
+    sections: [
+      { sectionId: 1, sectionNumber: 1, selected: false },
+      { sectionId: 2, sectionNumber: 2, selected: false },
+    ],
+    selected: false,
+  },
+  {
+    courseId: "ICS210",
+    sections: [
+      { sectionId: 3, sectionNumber: 1, selected: false },
+      { sectionId: 4, sectionNumber: 2, selected: false },
+    ],
+    selected: false,
+  },
+]);
 
-const selectedSectionIds = computed<(string | number)[]>(()=> {
+const selectedSectionIds = computed<(string | number)[]>(() => {
   let result: number[] = [];
   courses.forEach((course) => {
-    result = result.concat(course.sections.filter((section) => section.selected).map((section) => section.sectionId));
+    result = result.concat(
+      course.sections
+        .filter((section) => section.selected)
+        .map((section) => section.sectionId)
+    );
   });
   return result;
-})
-
+});
 
 const rules: FormRules = {
   subject: {
@@ -101,7 +96,7 @@ const selectSectionsByArray = (newSectionIds: (string | number)[]): void => {
   courses.forEach((course) => {
     // checking and unchecking of section checkboxs of this iteration's course
     course.sections.forEach((section) => {
-        section.selected = newSectionIds.includes(section.sectionId);
+      section.selected = newSectionIds.includes(section.sectionId);
     });
 
     // unchecking of the course checkbox if needed
@@ -109,17 +104,17 @@ const selectSectionsByArray = (newSectionIds: (string | number)[]): void => {
       course.selected = false;
     }
   });
-} 
+};
 
 const selectSectionsByCourse = (checkedCourse: Course): void => {
   courses.forEach((course) => {
     if (checkedCourse.courseId == course.courseId) {
       course.selected = !course.selected;
-      course.sections.map((e)=> e.selected = course.selected);
+      course.sections.map((e) => (e.selected = course.selected));
       return;
     }
-  })
-}
+  });
+};
 
 const submitForm = () => {
   console.log("Submitted");
@@ -129,8 +124,8 @@ const submitForm = () => {
       if (!errors) {
         // if no section is selected
         if (selectedSectionIds.value.length == 0) {
-        messenger.error("Must select at least one section")
-        return;
+          messenger.error("Must select at least one section");
+          return;
         }
         messenger.success("Submission Successful");
         // router.push("/home");
@@ -155,7 +150,9 @@ const submitForm = () => {
   >
     <section>
       <header class="t-flex-col t-items-center t-text-center">
-        <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">Create New Announcment</h1>
+        <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">
+          Create New Announcment
+        </h1>
       </header>
       <NForm
         class="t-w-[90vw] md:t-w-72 lg:t-w-80"
@@ -180,7 +177,7 @@ const submitForm = () => {
             type="textarea"
             @keydown.enter.prevent
             :autosize="{
-              minRows: 3
+              minRows: 3,
             }"
           />
         </NFormItem>
@@ -196,9 +193,16 @@ const submitForm = () => {
           <NSpace vertical size="medium">
             <div v-for="course in courses" :key="course.courseId">
               <!-- course checkbox -->
-              <NCheckbox :label="course.courseId" :checked="course.selected" @update:checked="selectSectionsByCourse(course)"/>
+              <NCheckbox
+                :label="course.courseId"
+                :checked="course.selected"
+                @update:checked="selectSectionsByCourse(course)"
+              />
               <!-- course sections checkboxs -->
-              <NCheckboxGroup :value="selectedSectionIds" @update:value="selectSectionsByArray">
+              <NCheckboxGroup
+                :value="selectedSectionIds"
+                @update:value="selectSectionsByArray"
+              >
                 <NSpace vertical size="small">
                   <NCheckbox
                     v-for="section in course.sections"
