@@ -3,48 +3,98 @@ import AnnouncementCard from "@/components/home/announcementCard.vue";
 import DeadlineCard from "@/components/home/deadlineCard.vue";
 import SectionCard from "@/components/home/sectionCard.vue";
 import ProfileCard from "@/components/utils/profileCard.vue";
+import { Role } from "@/enums/roles";
+import { AxiosInstance } from "@/axios";
 import { useAuth } from "@/stores/auth";
 import { useBreadCrumb } from "@/stores/breadcrump";
 import { AngleDown } from "@vicons/fa";
 import { Speaker024Filled, Timer24Filled, Book24Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
-import { NDropdown, type DropdownOption, NButton, NIcon } from "naive-ui";
-import { onMounted, ref } from "vue";
+import {
+  NDropdown,
+  type DropdownOption,
+  NButton,
+  NIcon,
+  NSpace,
+  NText,
+} from "naive-ui";
+import { onMounted, ref, type Ref, onBeforeMount } from "vue";
 
 interface SectionCardProps {
-  courseName: string;
-  sectionNum: number | string;
-  sectionId: number;
+  course: { id: string; courseName: string };
+  section_number: number | string;
+  id: number;
   term: string;
+}
+
+interface DeadlineProps {
+  deadline: string;
+  title: string;
   courseId: string;
-  coverUrl: string;
-  instructorImgUrl: string;
-  clickable: boolean;
-  shortened: boolean;
+  courseName: string;
+  sectionNo: number;
+}
+
+interface AnnouncementProps {
+  title: string;
+  description: string;
+  createdAt: string;
+  tag: string;
+  courseName: string;
+  courseId: string;
+  sectionNo: number;
 }
 
 const breadCrumb = useBreadCrumb();
 
 // TODO: api calls to fetch the sections for current term
 const auth = useAuth();
-const term = ref<string>("221");
+
+let fetchedTermOptions: Ref<DropdownOption[]> = ref([]);
+const term = ref<string>("");
+
 const sections = ref<SectionCardProps[]>([]);
-// TODO: api call to fetch all terms
-const termOptions: DropdownOption[] = [
-  { label: "221", key: "221", extra: "1st term of 2022" },
-  { type: "divider" },
-  {
-    label: "222",
-    key: "222",
-    extra: "2nd term of 2022",
-  },
-  { type: "divider" },
-  {
-    label: "223",
-    key: "223",
-    extra: "summer term of 2022",
-  },
-];
+const deadlines = ref<DeadlineProps[]>([]);
+const announcements = ref<AnnouncementProps[]>([]);
+
+onBeforeMount(async () => {
+  try {
+    const target: "student" | "instructor" =
+      auth.userProfile.role === Role.INSTRUCTOR ? "instructor" : "student";
+
+    // fetching for terms
+    fetchedTermOptions.value = (
+      await AxiosInstance.get(`course/${target}/terms/${auth.userProfile.id}`)
+    ).data.map((term: string) => ({
+      label: term,
+      key: term,
+    }));
+    // setting the term value from API
+    term.value = fetchedTermOptions.value[0].label as string;
+    // fetching sections
+    sections.value = (
+      await AxiosInstance.get(
+        `/course/${target}/${auth.userProfile.id}/${fetchedTermOptions.value[0].label}`
+      )
+    ).data;
+
+    // fetching the deadlines
+    deadlines.value = (
+      await AxiosInstance.get(
+        `/assignments/deadlines/${target}/${auth.userProfile.id}/${fetchedTermOptions.value[0].label}`
+      )
+    ).data;
+
+    // fetching the announcements
+    announcements.value = (
+      await AxiosInstance.get(
+        `/announcements/${target}/${auth.userProfile.id}/${fetchedTermOptions.value[0].label}`
+      )
+    ).data;
+  } catch (e) {
+    console.log(e);
+  }
+});
 
 onMounted(() => {
   breadCrumb.updateOptions([
@@ -81,8 +131,9 @@ function selectTerm(key: number | string) {}
             ><span class="t-mr-2 t-font-medium">Term </span
             ><NDropdown
               trigger="click"
-              :options="termOptions"
+              :options="fetchedTermOptions"
               @select="selectTerm"
+              v-model:value="term"
               ><NButton icon-placement="right" type="default">
                 <template #icon>
                   <NIcon :component="AngleDown" />
@@ -94,26 +145,13 @@ function selectTerm(key: number | string) {}
         </div>
         <div class="md:t-columns-2">
           <SectionCard
-            clickable
-            :section-id="3"
-            :shortened="false"
-            term="221"
-            course-id="ICS321"
-            course-name="Introduction to Database Systems"
-            cover-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
-            :section-num="5"
-            instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
-          />
-          <SectionCard
-            clickable
-            :shortened="false"
-            term="221"
-            :section-id="4"
-            course-id="SWE363"
-            course-name="Web Engineering & Development"
-            cover-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
-            :section-num="26"
-            instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
+            v-for="section in sections"
+            :key="section.id"
+            :section-id="section.id"
+            :term="term"
+            :course-id="section.course.id"
+            :course-name="section.course.courseName"
+            :section-num="section.section_number"
           />
         </div>
       </section>
@@ -133,17 +171,35 @@ function selectTerm(key: number | string) {}
             </h3>
           </div>
           <div class="md:t-columns-1">
-            <AnnouncementCard
-              title="Midterm Exam Seating Plan"
-              course-id="SWE363"
-              course-name="Introduction to Web Engineering"
-              instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
-              instructor-name="Muhab"
-              :last-update="Date.now().toLocaleString()"
-              section-no="23"
-              tag="Seating Plan"
-              content="We will have our Exam for the SWE363 Term 221 course of Web Engineering at exactly 8:30 PM in Building #54. Better be ready!"
-            />
+            <template v-if="announcements.length !== 0">
+              <AnnouncementCard
+                v-for="announcement in announcements"
+                :key="announcement.createdAt"
+                :title="announcement.title"
+                :course-id="announcement.courseId"
+                :course-name="announcement.courseName"
+                :last-update="announcement.createdAt"
+                :section-no="announcement.sectionNo"
+                :tag="announcement.tag"
+                :content="announcement.description"
+              />
+            </template>
+            <template v-else>
+              <div
+                class="t-text-gray-500 t-mb-3 t-py-4 t-flex t-flex-col t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+                vertical
+                align="center"
+              >
+                <NIcon
+                  class="t-rotate-[-45deg] t-pb-0"
+                  size="22"
+                  :component="Speaker024Filled"
+                />
+                <NText class="t-text-gray-500 t-font-medium"
+                  >No Announcements Yet!</NText
+                >
+              </div>
+            </template>
           </div>
         </section>
         <section>
@@ -159,14 +215,30 @@ function selectTerm(key: number | string) {}
             </h3>
           </div>
           <div class="md:t-columns-1">
-            <DeadlineCard
-              course-id="SWE363"
-              course-name="Web Engineeering"
-              :deadline="new Date('2022-11-27T23:15:00')"
-              :original-date="new Date('2022-11-08T10:00:00')"
-              title="Project Phase 3"
-              section-no="Common"
-            />
+            <template v-if="deadlines.length !== 0">
+              <DeadlineCard
+                course-id="SWE363"
+                course-name="Web Engineeering"
+                :deadline="new Date('2022-11-27T23:15:00')"
+                :original-date="new Date('2022-11-08T10:00:00')"
+                title="Project Phase 3"
+                section-no="Common"
+              />
+            </template>
+            <template v-else>
+              <div
+                class="t-text-gray-500 t-mb-3 t-py-4 t-flex t-flex-col t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+              >
+                <NIcon
+                  class="t-rotate-[-45deg] t-pb-0"
+                  size="22"
+                  :component="Timer24Filled"
+                />
+                <NText class="t-text-gray-500 t-font-medium"
+                  >No Deadlines Ahead!</NText
+                >
+              </div>
+            </template>
           </div>
         </section>
       </aside>

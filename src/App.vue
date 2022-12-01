@@ -1,13 +1,33 @@
 <script setup lang="ts">
-import { RouterView, useRoute } from "vue-router";
+import { RouterView, useRoute, useRouter } from "vue-router";
 import { NConfigProvider, NMessageProvider, NDialogProvider } from "naive-ui";
 import ProfileCard from "./components/utils/profileCard.vue";
 import { useAuth } from "./stores/auth";
 import BreadcrumbWrapper from "./components/utils/breadcrumbWrapper.vue";
-
+import { onBeforeMount } from "vue";
 const props = defineProps<{ header: boolean }>();
 
 const auth = useAuth();
+const router = useRouter();
+
+onBeforeMount(() => {
+  router.beforeEach(async (to, from, next) => {
+    if (to.name !== "login" && auth.userProfile.username === "") {
+      if (sessionStorage.getItem("accessToken")) {
+        try {
+          await auth.refresh(sessionStorage.getItem("accessToken")!);
+          next();
+        } catch (e) {
+          next({ name: "login" });
+        }
+      } else {
+        next();
+      }
+    } else {
+      next();
+    }
+  });
+});
 
 const route = useRoute();
 </script>

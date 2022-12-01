@@ -18,11 +18,12 @@
           instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
         /><NButton
           v-if="auth.userProfile.role == Role.INSTRUCTOR"
+          @click="attendanceModal.visible = true"
           class="t-w-full"
           type="primary"
           ><template #icon><NIcon :component="CoPresentRound" /></template> Take
           Attendance</NButton
-        > 
+        >
         <!-- options menu -->
         <section class="t-hidden md:t-flex">
           <NButtonGroup vertical class="t-w-full">
@@ -70,6 +71,11 @@
           </div>
         </template>
       </section>
+      <AttendanceModal
+        @closed="attendanceModal.visible = false"
+        :visible="attendanceModal.visible"
+        :section-id="attendanceModal.sectionId"
+      />
     </main>
   </div>
 </template>
@@ -98,6 +104,7 @@ import {
 import { useBreadCrumb } from "@/stores/breadcrump";
 import { NButtonGroup, NButton, NIcon } from "naive-ui";
 import { CoPresentRound } from "@vicons/material";
+import AttendanceModal from "@/components/course/utils/AttendanceModal.vue";
 
 const InstructorSlot = defineAsyncComponent(
   () => import("./slots/InstructorSlot.vue")
@@ -126,6 +133,11 @@ const auth = useAuth();
 // local state
 const tab = ref<SectionTab>("Assignments");
 
+const attendanceModal = ref<{ visible: boolean; sectionId: number }>({
+  visible: false,
+  sectionId: props.sectionId,
+});
+
 // TODO: replace with an API call
 const courseInfo = reactive({
   courseName: "Management of Database Systems",
@@ -148,7 +160,7 @@ provide(
 watch(
   () => tab,
   () => {
-    console.log(tab);
+    console.log(tab, auth.userProfile);
   }
 );
 

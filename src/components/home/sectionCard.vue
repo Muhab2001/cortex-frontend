@@ -9,10 +9,6 @@ interface SectionCardProps {
   sectionId: number;
   term: string;
   courseId: string;
-  coverUrl: string;
-  instructorImgUrl: string;
-  clickable: boolean;
-  shortened: boolean;
 }
 
 const props = defineProps<SectionCardProps>();
@@ -22,7 +18,7 @@ const router = useRouter();
 
 <template>
   <NCard
-    class="t-rounded-lg t-mb-3 t-cursor-pointer t-border-solid t-border-[2px]"
+    class="t-rounded-lg t-mb-3 t-cursor-pointer t-border-solid t-border-[2px] t-break-inside-avoid"
     content-style="width: 100%; padding: 0px; height: 300px"
     @click="
       router.push({
@@ -34,11 +30,11 @@ const router = useRouter();
     "
     hoverable
   >
-    <img
-      class="t-hidden md:t-flex t-w-full t-rounded-lg t-h-[200px]"
+    <!-- <img
+      class="t-hidden t-w-full t-rounded-lg t-h-[200px]"
       :src="props.coverUrl"
       :alt="courseName + ' Section cover'"
-    />
+    /> -->
     <div class="t-px-4 t-flex t-justify-between t-w-full t-items-center">
       <div class="t-w-fit t-py-2 title-container">
         <div>
@@ -57,7 +53,6 @@ const router = useRouter();
         </div>
         <NEllipsis :line-clamp="1">{{ props.courseName }}</NEllipsis>
       </div>
-      <NAvatar v-if="!props.shortened" round :src="props.instructorImgUrl" />
     </div>
   </NCard>
 </template>

@@ -24,11 +24,16 @@ import {
 } from "@vicons/ionicons5";
 import router from "@/router";
 import { useIcon } from "@/composables/useIcon";
+import { useAuth } from "@/stores/auth";
 
 const iconUtils = useIcon();
+const auth = useAuth();
 
 const handleSelect = (key: string) => {
   if (key === "SignOut") {
+    console.log();
+    
+    auth.logout();
     router.push("/");
   }
 };
@@ -55,5 +60,7 @@ const props = defineProps<{
   role: number;
   photoUrl: string;
 }>();
+
+console.log("PROFILE", props);
 </script>
 <style></style>

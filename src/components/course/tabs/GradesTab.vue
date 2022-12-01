@@ -1,5 +1,6 @@
 <template>
   <NCard
+    class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0"
   >

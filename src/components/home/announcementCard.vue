@@ -7,8 +7,7 @@ interface AnnouncmentProps {
   courseId: string;
   courseName: string;
   sectionNo: number | string;
-  instructorName: string;
-  instructorImgUrl: string;
+
   tag: string;
 }
 

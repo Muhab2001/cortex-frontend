@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AxiosInstance } from "@/axios";
 import { useAuth } from "@/stores/auth";
 import { useBreadCrumb } from "@/stores/breadcrump";
 import axios from "axios";
@@ -64,15 +65,15 @@ const submitForm = () => {
     async (errors: Array<FormValidationError> | undefined) => {
       if (!errors) {
         try {
-          router.push("/home");
           // console.log(
           //   await axios.post("/login", {
           //     username: model.value.username,
           //     password: model.value.password,
           //   })
           // );
-          auth.signIn(model.value.username!, model.value.password!);
+          await auth.login(model.value.username!, model.value.password!);
           messenger.success("Successful sign in!");
+          router.push("/home");
         } catch (e: any) {
           messenger.error("Login Failed!");
         }
@@ -116,6 +117,9 @@ const submitForm = () => {
         />
       </NFormItem>
       <NButton
+        secondary
+        strong
+        type="success"
         @click="submitForm"
         class="t-w-full hover:t-bg-green-500 hover:t-text-white t-mt-10"
         >Login</NButton

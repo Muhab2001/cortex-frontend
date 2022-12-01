@@ -81,6 +81,7 @@
       <h2 class="t-font-semibold t-mb-0 t-mt-3">Announcement Availability</h2>
       <p class="t-mb-2">Choose targeted sections</p>
       <NFormItem
+        v-if="props.mode === 'create'"
         class="t-mt-4"
         :label-style="{
           fontWeight: 'bold',
@@ -126,7 +127,7 @@ import {
   type FormValidationError,
   useMessage,
 } from "naive-ui";
-import { ref, inject, watch } from "vue";
+import { ref, inject, watch, type Ref, computed } from "vue";
 
 interface Announcement {
   subject: string;
@@ -160,7 +161,7 @@ const messenger = useMessage();
 // TODO: replace with an api call
 const allSections = [1, 2, 3];
 
-const rules: FormRules = {
+const rules: Ref<FormRules> = computed(() => ({
   subject: {
     required: true,
     type: "string",
@@ -180,7 +181,7 @@ const rules: FormRules = {
     trigger: ["blur"],
   },
   sectionIds: {
-    required: true,
+    required: props.mode === "edit",
     type: "array",
     validator(itemRule: FormItemRule, value: number[]) {
       console.log(value);
@@ -193,7 +194,7 @@ const rules: FormRules = {
     },
     trigger: "blur",
   },
-};
+}));
 
 watch(
   () => props.visible,

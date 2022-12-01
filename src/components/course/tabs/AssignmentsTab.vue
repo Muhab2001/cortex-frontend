@@ -144,6 +144,7 @@ function showSubmissionModal(
     @closed="submissionModalState.visible = false"
   />
   <NCard
+    class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
   >
@@ -160,6 +161,7 @@ function showSubmissionModal(
         <span class="t-text-lg t-font-semibold">Assignments</span>
       </div>
       <NButton
+        :v-if="props.role == Role.INSTRUCTOR"
         @click="showAssignmentModal"
         class="t-w-full t-mt-0 md:t-mt-3 t-mb-5 md:t-mb-0"
         type="info"

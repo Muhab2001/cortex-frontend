@@ -11,7 +11,7 @@
         <div id="course-info" class="t-w-full">
           <div
             id="course-meta-info"
-            class="t-flex t-justify-between t-items-center t-h-fit"
+            class="t-flex t-justify-between t-items-center t-h-fit t-flex-wrap"
           >
             <span>
               <span class="t-font-bold t-mr-2 t-text-lg t-text-blue-500">{{
