@@ -5,7 +5,7 @@
       props.contracted ? '' : 't-w-full'
     } ${
       props.isCurrent && props.contracted ? 't-flex-1' : 't-flex-0'
-    } t-flex t-justify-start`"
+    } t-flex t-justify-start `"
   >
     <span
       :class="` t-w-510 t-h-full t-inline-flex t-justify-center t-p-1 t-items-center  t-rounded-md ${

@@ -9,9 +9,14 @@
           :src="props.photoUrl"
         />
       </span>
-      <span class="t-mx-3 t-hidden md:t-flex t-font-bold">{{
-        props.username
-      }}</span>
+      <div>
+        <span class="t-mx-3 t-hidden md:t-flex t-font-bold t-text-sm">{{
+          props.name
+        }}</span>
+        <span class="t-mx-3 t-hidden md:t-flex t-font-medium t-text-xs">{{
+          props.username
+        }}</span>
+      </div>
     </span>
   </NDropdown>
 </template>
@@ -32,7 +37,7 @@ const auth = useAuth();
 const handleSelect = (key: string) => {
   if (key === "SignOut") {
     console.log();
-    
+
     auth.logout();
     router.push("/");
   }
@@ -56,6 +61,7 @@ const profileOptions = [
 ];
 
 const props = defineProps<{
+  name: string;
   username: string;
   role: number;
   photoUrl: string;

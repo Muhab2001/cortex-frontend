@@ -144,7 +144,7 @@ function showSubmissionModal(
     @closed="submissionModalState.visible = false"
   />
   <NCard
-    class="t-border-solid t-border-[2px]"
+    class="t-border-solid t-border-[2px] t-border-gray-200"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
   >

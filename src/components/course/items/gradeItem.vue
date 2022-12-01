@@ -42,7 +42,7 @@ const gradeType = (): "success" | "warning" | "error" | "default" => {
 <template>
   <NCard
     hoverable
-    class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer t-border-solid t-border-[2px]"
+    class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer t-border-solid t-border-[2px] t-border-gray-200"
     content-style="display:flex; align-items: center; padding: 12px; flex-direction: column; padding-bottom: 1px"
     footer-style="padding-bottom: 6px"
   >

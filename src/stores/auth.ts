@@ -21,7 +21,8 @@ export const useAuth = defineStore("auth", () => {
     console.log("REFRESHING");
 
     const response: {
-      name: string;
+      firstName: string;
+      lastName: string;
       username: string;
       photoUrl: string;
       role: Role;
@@ -47,7 +48,7 @@ export const useAuth = defineStore("auth", () => {
     userProfile.photoUrl = "http://localhost:3000/" + response.photoUrl;
     userProfile.role = response.role;
     userProfile.id = response.id;
-    userProfile.fullname = response.name;
+    userProfile.fullname = response.firstName + " " + response.lastName;
   }
 
   async function login(username: string, password: string): Promise<void> {
