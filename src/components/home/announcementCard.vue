@@ -48,7 +48,7 @@ const props = defineProps<AnnouncmentProps>();
 
     <div class="t-p-5 t-pt-2">
       <NDivider class="t-my-0 t-mb-2" />
-      <h3 class="t-font-bold t-mb-2">{{ props.title }}</h3>
+      <h1 class="t-font-bold t-mb-1 t-text-lg">{{ props.title }}</h1>
       <NEllipsis
         expand-trigger="click"
         :tooltip="false"

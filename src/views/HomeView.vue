@@ -32,6 +32,7 @@ interface DeadlineProps {
   title: string;
   courseId: string;
   courseName: string;
+  createdAt: string;
   sectionNo: number;
 }
 
@@ -91,6 +92,7 @@ onBeforeMount(async () => {
         `/announcements/${target}/${auth.userProfile.id}/${fetchedTermOptions.value[0].label}`
       )
     ).data;
+    console.log(announcements.value);
   } catch (e) {
     console.log(e);
   }
@@ -217,12 +219,20 @@ function selectTerm(key: number | string) {}
           <div class="md:t-columns-1">
             <template v-if="deadlines.length !== 0">
               <DeadlineCard
-                course-id="SWE363"
-                course-name="Web Engineeering"
-                :deadline="new Date('2022-11-27T23:15:00')"
-                :original-date="new Date('2022-11-08T10:00:00')"
-                title="Project Phase 3"
-                section-no="Common"
+                v-for="deadline in deadlines"
+                :key="
+                  deadline.title +
+                  ' ' +
+                  deadline.sectionNo +
+                  ' ' +
+                  deadline.courseId
+                "
+                :course-id="deadline.courseId"
+                :course-name="deadline.courseName"
+                :deadline="new Date(deadline.deadline)"
+                :original-date="new Date(deadline.createdAt)"
+                :title="deadline.title"
+                :section-no="deadline.sectionNo"
               />
             </template>
             <template v-else>

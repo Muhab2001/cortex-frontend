@@ -38,7 +38,6 @@ export const useAuth = defineStore("auth", () => {
         }
       )
     ).data;
-    console.log("REFRESH RESPONSE", response);
 
     AxiosInstance.defaults.headers.common = {
       Authentication: `Bearer ${access_token}`,
@@ -78,9 +77,6 @@ export const useAuth = defineStore("auth", () => {
     userProfile.role = response.role;
     userProfile.id = response.id;
     userProfile.fullname = response.name;
-    console.log(userProfile);
-
-    console.log("RESPONSE", response);
   }
 
   function logout(): void {
@@ -94,7 +90,6 @@ export const useAuth = defineStore("auth", () => {
       Authentication: null,
     };
     sessionStorage.removeItem("accessToken");
-    console.log("TOKEN", sessionStorage.getItem("accessToken"));
   }
 
   return readonly({ userProfile, login, logout, refresh });

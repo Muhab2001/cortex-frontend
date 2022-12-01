@@ -2,6 +2,7 @@
   <NCard
     class="t-rounded-md t-border-solid t-border-[2px] t-cursor-pointer"
     header-style="padding-bottom: 0;"
+    content-style="padding-top: 0"
     hoverable
     size="small"
   >
