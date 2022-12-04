@@ -34,9 +34,14 @@
             >Term {{ courseMeta?.term }}</span
           >
         </div>
-        <NEllipsis class="t-text-lg" :line-clamp="1">{{
+        <NEllipsis class="t-text-md" :line-clamp="1">{{
           courseMeta?.courseName
         }}</NEllipsis>
+        <NText
+          class="t-text-xl t-text-gray-500 t-flex t-font-semibold"
+          :line-clamp="1"
+          >{{ props.title }}</NText
+        >
       </div>
     </div>
     <NDivider class="t-mt-0 t-mb-1"></NDivider>
@@ -66,7 +71,7 @@
           ref="uploadRef"
           :default-upload="false"
           action="https://www.mocky.io/v2/5e4bafc63100007100d8b70f"
-          :custom-request="requestHandler"
+          :custom-request="customRequest"
           ><NButton>Upload files</NButton></NUpload
         >
       </NFormItem>
@@ -109,6 +114,7 @@ import {
   NInputNumber,
   type FormValidationError,
   useMessage,
+  useLoadingBar,
 } from "naive-ui";
 import {
   inject,
@@ -119,6 +125,8 @@ import {
   type Ref,
 } from "vue";
 import { DiceThree, Infinity } from "@vicons/fa";
+import { AxiosInstance } from "@/axios";
+import { useAuth } from "@/stores/auth";
 
 interface SubmissionModalProps {
   visible: boolean;
@@ -135,8 +143,10 @@ const props = defineProps<SubmissionModalProps>();
 const emits = defineEmits<{
   (e: "closed"): void;
 }>();
+const auth = useAuth();
 
 const messenger = useMessage();
+const loading = useLoadingBar();
 const courseMeta = inject(CourseMeta);
 
 // form state
@@ -145,6 +155,8 @@ const uploadRef = ref<UploadInst | null>(null);
 const modelRef = ref<SubmissionModel>({
   comment: "",
 });
+
+const currentUploadId = ref<number>(0);
 
 const rules: Ref<FormRules> = computed(() => ({
   comment: {
@@ -163,29 +175,64 @@ function submitForm() {
     async (errors: Array<FormValidationError> | undefined) => {
       if (!errors) {
         try {
-          messenger.success("Successful Assignment Creation!");
+          loading.start();
+          const submissionId: number = (
+            await AxiosInstance.post(
+              "assignments/submission/" + props.assignmentId,
+              {
+                comment: modelRef.value.comment,
+              }
+            )
+          ).data;
+
+          currentUploadId.value = submissionId;
+          messenger.success("Successful Submission!");
+          loading.finish();
         } catch (e: any) {
-          messenger.error("Assignment creation Failed!");
+          messenger.error("Submission Failed. Try again later");
         }
       } else {
         console.log(errors);
-        messenger.error("Login Failed!");
+        loading.error();
+        messenger.error("Submission is invalid!");
       }
     }
   );
 }
 
-function requestHandler({
-  file,
-  data,
-  headers,
-  withCredentials,
-  action,
-  onFinish,
-  onError,
-  onProgress,
-}: UploadCustomRequestOptions) {
-  return null;
-}
+watch(
+  () => props.visible,
+  () => {
+    modelRef.value.comment = "";
+  }
+);
+
+watch(currentUploadId, async () => {
+  try {
+    console.log("BEFORE", currentUploadId.value);
+
+    if (currentUploadId.value !== 0) uploadRef.value?.submit();
+    console.log("submitted");
+  } catch (e) {
+    // if upload fails, delete the new assignment to maintain consistency
+    // await AxiosInstance.delete("submission/" + currentUploadId.value);
+  }
+});
+
+const customRequest = async ({ file }: UploadCustomRequestOptions) => {
+  const formData = new FormData();
+  try {
+    console.log("CURRENT", currentUploadId.value);
+
+    if (file) formData.append("files", file.file as File);
+
+    await AxiosInstance.patch(
+      `assignments/submission/` + currentUploadId.value,
+      formData
+    );
+  } catch (e) {
+    messenger.error("File Upload Failed");
+  }
+};
 </script>
 <style></style>

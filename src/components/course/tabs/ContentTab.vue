@@ -5,7 +5,7 @@
     :mode="modalState.mode"
     :target-item="modalState.editedItem"
     @closed="
-      () => {
+      async () => {
         modalState.visible = false;
       }
     "
@@ -28,6 +28,8 @@
         <span class="t-text-lg t-font-semibold">Course Content</span>
       </div>
       <NButton
+        secondary
+        strong
         @click="showModal"
         class="t-w-full t-mt-0 md:t-mt-3 t-mb-5 md:t-mb-0"
         type="info"
@@ -39,32 +41,49 @@
       <NDivider class="t-hidden md:t-flex"></NDivider>
     </template>
     <!-- main card content -->
-    <div class="t-columns-1 lg:t-columns-2">
-      <template v-for="item in items" :key="item.id">
-        <ContentItem
-          @delete="deleteItem"
-          @edit="updateItem"
-          :id="item.id"
-          :editable="props.role == Role.INSTRUCTOR"
-          :description="item.description"
-          :title="item.title"
-          :lastUpdated="item.lastUpdated"
-          :file-urls="item.fileUrls"
-          :visible="item.visible"
-        />
-      </template>
-    </div>
+    <template v-if="items.length !== 0">
+      <div class="t-columns-1 lg:t-columns-2">
+        <template v-for="item in items" :key="item.id">
+          <ContentItem
+            @delete="deleteItem"
+            @edit="updateItem"
+            :id="item.id"
+            :editable="props.role == Role.INSTRUCTOR"
+            :description="item.description"
+            :title="item.title"
+            :lastUpdated="item.updatedAt"
+            :file-urls="item.fileUrls"
+            :visible="item.visible"
+          />
+        </template>
+      </div>
+    </template>
+    <template v-else>
+      <div
+        class="t-text-gray-500 t-mb-3 t-py-10 t-flex t-flex-col t-columns-1 t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+      >
+        <NIcon class="t-pb-0" size="30" :component="EmojiSurprise20Filled" />
+        <NText class="t-text-gray-500 t-font-medium"
+          >You haven't created any content to this section yet!</NText
+        >
+      </div>
+    </template>
   </NCard>
 </template>
 <script setup lang="ts">
-import { reactive, ref, watch } from "vue";
+import { onBeforeMount, reactive, ref, watch } from "vue";
 import type { ContentItemProps } from "typings/CourseViewTabs";
 import ContentItem from "../items/ContentItem.vue";
 import { Role } from "@/enums/roles";
 import { Icon } from "@vicons/utils";
-import { AddCircle24Filled, Book24Filled } from "@vicons/fluent";
+import {
+  AddCircle24Filled,
+  Book24Filled,
+  EmojiSurprise20Filled,
+} from "@vicons/fluent";
 import { NButton, NCard, NDivider, NIcon, useDialog } from "naive-ui";
 import ContentModal from "../utils/ContentModal.vue";
+import { AxiosInstance } from "@/axios";
 
 interface SectionTabProps {
   sectionId: number;
@@ -100,63 +119,15 @@ watch(
 );
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
-const items = ref<ContentItemProps[]>([
-  {
-    id: 1,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Syllabus",
-    description: "These are the contents included in the syllabus",
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-    visible: true,
-  },
-  {
-    id: 2,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Week 1 material",
-    description: "All material covered in week 1 lectures and labs",
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-    visible: false,
-  },
-  {
-    id: 6,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Week 1 material",
-    description: "All material covered in week 1 lectures and labs",
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-    visible: false,
-  },
-  {
-    id: 4,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Week 1 material",
-    description: "All material covered in week 1 lectures and labs",
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-    visible: false,
-  },
-  {
-    id: 10,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Week 1 material",
-    description: "All material covered in week 1 lectures and labs",
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-    visible: false,
-  },
-]);
+const items = ref<ContentItemProps[]>([]);
+
+async function fetchItems() {
+  items.value = (await AxiosInstance.get("content/" + props.sectionId)).data;
+}
+
+onBeforeMount(async () => {
+  await fetchItems();
+});
 
 function deleteItem(itemID: number) {
   // display the confirmation dialog
@@ -166,7 +137,8 @@ function deleteItem(itemID: number) {
     positiveText: "Confirm",
     negativeText: "Cancel",
     maskClosable: true,
-    onPositiveClick: () => {
+    onPositiveClick: async () => {
+      await AxiosInstance.delete("content/" + itemID);
       items.value = items.value.filter((item) => item.id !== itemID);
     },
     onMaskClick: () => {},

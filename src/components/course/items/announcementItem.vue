@@ -2,6 +2,7 @@
 import { useIcon } from "@/composables/useIcon";
 import { Envelope } from "@vicons/fa";
 import { Delete24Filled, Edit16Filled, Folder24Filled } from "@vicons/fluent";
+import { Pricetag } from "@vicons/ionicons5";
 import { Icon } from "@vicons/utils";
 import {
   NButton,
@@ -10,6 +11,7 @@ import {
   useDialog,
   NEllipsis,
   NIcon,
+  NTag,
 } from "naive-ui";
 import { computed, reactive } from "vue";
 
@@ -17,7 +19,7 @@ interface AnnouncementItemProps {
   id: number;
   subject: string;
   content: string;
-  lastUpdated: string;
+  updatedAt: string;
   editable: boolean;
   tag: string;
 }
@@ -35,17 +37,9 @@ const itemState = reactive<AnnouncementItemProps>({ ...props });
 const headerIcon = computed(() =>
   iconUtils.renderIcon(Envelope, {
     color: "#F49D1A",
-    size: "24",
+    size: "26",
   })
 );
-// TODO: supply functions that trigger deletion or editing of content files
-const dialog = useDialog();
-
-function deleteItem() {}
-
-function updateItem() {
-  // TODO: open a popup to edit the files
-}
 
 function editItem() {
   emits("edit", {
@@ -53,6 +47,7 @@ function editItem() {
     content: itemState.content,
     id: props.id,
     tag: itemState.tag,
+    updatedAt: itemState.updatedAt,
   });
 }
 </script>
@@ -79,7 +74,7 @@ function editItem() {
             ><NEllipsis
               expand-trigger="click"
               :line-clamp="1"
-              class="t-font-semibold t-text-md"
+              class="t-font-semibold t-text-xl"
               >{{ itemState.subject }}</NEllipsis
             >
           </span>
@@ -115,9 +110,20 @@ function editItem() {
           </span>
         </span>
         <div class="t-flex t-flex-wrap">
-          <span
-            class="t-py-[0.2rem] t-px-1 t-rounded-sm t-text-xs t-mb-3 t-bg-pink-500 t-text-white t-mr-2"
-            >{{ itemState.tag }}</span
+          <NTag
+            round
+            size="large"
+            type="info"
+            :bordered="false"
+            class="t-py-[0.2rem] t-px-3 t-text-sm t-mb-3 t-mr-2"
+          >
+            <template #icon>
+              <NIcon
+                class="t-mr-1 t-ml-2"
+                size="16"
+                :component="Pricetag"
+              /> </template
+            >{{ itemState.tag }}</NTag
           >
         </div>
         <NEllipsis
@@ -135,7 +141,7 @@ function editItem() {
         <NDivider class="t-py-0 t-my-1"></NDivider>
         <span class="t-font-thin t-mr-2">Last Updated </span>
         <span class="t-font-medium t-text-blue-400">{{
-          itemState.lastUpdated
+          new Date(itemState.updatedAt).toLocaleString()
         }}</span>
       </div>
     </template>

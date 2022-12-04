@@ -24,7 +24,7 @@
         }}</span>
       </div>
     </template>
-    <NDivider class="t-my-0"></NDivider>
+    <NDivider class="t-my-0 t-mb-2"></NDivider>
     <div class="t-px-4 t-py-2 t-flex t-justify-between t-w-full t-items-center">
       <div class="t-w-fit t-py-0 title-container">
         <div class="t-flex t-items-center">
@@ -41,7 +41,7 @@
         }}</NEllipsis>
       </div>
     </div>
-    <NDivider class="t-mt-0 t-mb-1"></NDivider>
+    <NDivider class="t-mt-0 t-mb-3"></NDivider>
     <div class="t-font-semibold t-text-md t-pt-0">
       {{
         props.mode == "edit"
@@ -50,16 +50,20 @@
       }}
     </div>
     <NForm class="t-mt-5" :model="modelRef" :rules="rules" ref="formRef">
-      <h2 class="t-font-semibold t-mb-0">Content Details</h2>
+      <h2 class="t-font-semibold t-mb-0 t-text-blue-400">Content Details</h2>
       <p class="t-mb-4">Describe the content item for students</p>
-      <NFormItem label="Title" path="title">
+      <NFormItem
+        label="Title"
+        path="title"
+        feedback="Provide a title that is unique among other assignments for the section"
+      >
         <NInput
           maxlength="30"
           type="text"
           show-count
           v-model:value="modelRef.title"
         /> </NFormItem
-      ><NFormItem label="Description" path="description">
+      ><NFormItem class="t-mt-4" label="Description" path="description">
         <NInput
           placeholder="Enter a brief description"
           type="textarea"
@@ -71,11 +75,14 @@
       </NFormItem>
       <!-- TODO: create a sectionGroup id for grouped editing -->
 
-      <h2 class="t-font-semibold t-mb-0">Content Availability</h2>
-      <p class="t-mb-2">
+      <h2 class="t-font-semibold t-mb-0 t-text-blue-400">
+        Content Availability
+      </h2>
+      <p v-if="props.mode === 'create'" class="t-mb-2">
         Choose targeted sections, and the visibilty of created item
       </p>
       <NFormItem
+        v-if="props.mode === 'create'"
         class="t-inline-flex t-mr-4"
         label-placement="left"
         :label-style="{
@@ -86,7 +93,7 @@
       >
         <NCheckboxGroup v-model:value="modelRef.sections">
           <NCheckbox
-            v-for="section in allSections"
+            v-for="section in courseSections"
             :key="section"
             :label="section.toString()"
             :value="section"
@@ -94,8 +101,7 @@
         </NCheckboxGroup>
       </NFormItem>
       <NFormItem
-        class="t-inline-flex"
-        label-placement="left"
+        class="t-mt-3"
         :label-style="{
           fontWeight: 'bolder',
         }"
@@ -126,7 +132,9 @@
           >
         </NSwitch>
       </NFormItem>
-      <h2 class="t-font-semibold t-mb-0 t-mt-3">Attachements</h2>
+      <h2 class="t-font-semibold t-mb-0 t-mt-3 t-text-blue-400">
+        Attachements
+      </h2>
       <p class="t-mb-0">Supply all needed files for the course item</p>
 
       <NFormItem class="t-mt-0 t-pt-0" path="attachements">
@@ -137,7 +145,8 @@
           ref="uploadRef"
           :default-upload="false"
           action="https://www.mocky.io/v2/5e4bafc63100007100d8b70f"
-          :custom-request="requestHandler"
+          :default-file-list="props.targetItem?.fileUrls.map((url: string) => ({id: url, name: url.replace(/.*\//g, ''), url: AxiosInstance.defaults.baseURL + url} as UploadFileInfo ))"
+          :custom-request="customRequest"
           ><NButton>Upload files</NButton></NUpload
         >
       </NFormItem>
@@ -153,6 +162,7 @@
 </template>
 
 <script setup lang="ts">
+import { AxiosInstance } from "@/axios";
 import { CourseMeta } from "@/injection_keys/courseView.keys";
 import {
   ContentView20Filled,
@@ -175,13 +185,17 @@ import {
   type FormRules,
   type UploadCustomRequestOptions,
   type UploadInst,
+  type FormValidationError,
+  type UploadFileInfo,
   NDivider,
   NCheckboxGroup,
   NButtonGroup,
   NEllipsis,
   NInputGroupLabel,
+  useMessage,
+  useLoadingBar,
 } from "naive-ui";
-import { ref, watch, inject, type CSSProperties } from "vue";
+import { ref, watch, inject, type CSSProperties, onBeforeMount } from "vue";
 
 const props = defineProps<ContentModalProps>();
 const emits = defineEmits<{
@@ -203,25 +217,30 @@ interface ContentModalProps {
 }
 
 interface ContentModel {
-  title?: string;
+  title: string;
   description?: string;
-  sections?: number[];
-  visible?: boolean;
+  sections: number[];
+  visible: boolean;
 }
 
+// UI utils
+const messenger = useMessage();
+const loading = useLoadingBar();
 // injection logic
 const courseMeta = inject(CourseMeta);
 console.log(courseMeta);
 // TODO replace with an API call
-const allSections = [1, 2, 3];
+const courseSections = ref<number[]>([]);
+
 // form state
+const currentUploadId = ref<number>(0);
 const formRef = ref<FormInst | null>(null);
 const uploadRef = ref<UploadInst | null>(null);
 const modelRef = ref<ContentModel>({
   title: "",
   description: "",
   // replace with a fetch request to the api for all sections under the course in current term
-  sections: [1, 2],
+  sections: [],
   visible: false,
 });
 // form validation
@@ -260,28 +279,45 @@ const rules: FormRules = {
 // handling pre-filling the modal content on editing mode
 watch(
   () => props.visible,
-  () => {
+  async () => {
     if (props.visible) {
+      courseSections.value = (
+        await AxiosInstance.get(
+          `/course/instructor/${courseMeta?.value.courseId}/${courseMeta?.value.term}`
+        )
+      ).data;
       if (props.mode === "edit") {
         modelRef.value = {
-          title: props.targetItem?.title,
-          description: props.targetItem?.description,
+          title: props.targetItem!.title,
+          description: props.targetItem!.description,
           // replace with a fetch request to the api for all sections under the course in current term
-          sections: [1, 2],
-          visible: props.targetItem?.visible,
+          sections: [props.targetItem!.id],
+          visible: Boolean(props.targetItem!.visible),
         };
       } else if (props.mode === "create") {
         modelRef.value = {
           title: "",
           description: "",
           // replace with a fetch request to the api for all sections under the course in current term
-          sections: [1, 2],
+          sections: [],
           visible: false,
         };
       }
     }
   }
 );
+// handling file upload to each section
+watch(currentUploadId, async () => {
+  try {
+    console.log("BEFORE", currentUploadId.value);
+
+    if (currentUploadId.value !== 0) uploadRef.value?.submit();
+    console.log("submitted");
+  } catch (e) {
+    // if upload fails, delete the new assignment to maintain consistency
+    await AxiosInstance.delete("content/upload/" + currentUploadId.value);
+  }
+});
 
 // switch styling
 const railStyle = ({
@@ -298,18 +334,83 @@ const railStyle = ({
 };
 // form submission handling
 // TODO: API communications
-function submitForm() {}
+function submitForm() {
+  formRef.value?.validate(
+    async (errors: Array<FormValidationError> | undefined) => {
+      if (!errors) {
+        if (props.mode === "create") {
+          try {
+            loading.start();
+            messenger.loading("Processing Content Creation", {
+              duration: 500,
+            });
+            console.log(modelRef.value.sections);
 
-function requestHandler({
-  file,
-  data,
-  headers,
-  withCredentials,
-  action,
-  onFinish,
-  onError,
-  onProgress,
-}: UploadCustomRequestOptions) {
-  return null;
+            for (const section of modelRef.value.sections) {
+              const newId = (
+                await AxiosInstance.post("content/", {
+                  sectionId: section,
+                  title: modelRef.value.title,
+                  description: modelRef.value.description,
+                  visible: +modelRef.value.visible,
+                })
+              ).data;
+              // updating the path to submit the files
+              currentUploadId.value = newId;
+            }
+            messenger.success("Successful Assignment Creation!");
+
+            loading.finish();
+
+            emits("closed");
+          } catch (e: any) {
+            loading.error();
+            messenger.error("Assignment creation Failed!");
+          }
+        } else if (props.mode === "edit") {
+          try {
+            loading.start();
+            messenger.loading("Processing Assignment Update", {
+              duration: 500,
+            });
+
+            await AxiosInstance.patch("content/" + props.targetItem!.id, {
+              title: modelRef.value.title,
+              description: modelRef.value.description,
+              visible: +modelRef.value.visible,
+            });
+
+            // updating the path to submit the files
+            currentUploadId.value = props.targetItem!.id;
+            messenger.success("Successful Assignment Update!");
+
+            loading.finish();
+
+            messenger.info("Refresh the page to see the changes");
+            emits("closed");
+          } catch (e) {
+            loading.error();
+            messenger.error("Assignment Update Failed!");
+          }
+        }
+      }
+    }
+  );
 }
+
+const customRequest = async ({ file }: UploadCustomRequestOptions) => {
+  const formData = new FormData();
+  try {
+    console.log("CURRENT", currentUploadId.value);
+
+    if (file) formData.append("files", file.file as File);
+
+    await AxiosInstance.patch(
+      `content/upload/` + currentUploadId.value,
+      formData
+    );
+  } catch (e) {
+    messenger.error("File Upload Failed");
+  }
+};
 </script>

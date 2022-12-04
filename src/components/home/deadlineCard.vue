@@ -35,21 +35,20 @@
     >
 
     <!-- card body -->
-    <template #action>
-      <NDivider class="t-my-0 t-mb-2" />
-      <div>
-        <h3 class="t-font-bold t-mb-2">{{ props.title }}</h3>
-        <div class="t-mb-1">
-          <NProgress
-            :percentage="percentage"
-            :status="percentageStatus"
-            :show-indicator="false"
-            type="line"
-          />
-        </div>
-        <div :class="styledProgress">{{ outputString }}</div>
+
+    <NDivider class="t-my-0 t-mb-2" />
+    <div>
+      <h3 class="t-font-bold t-mb-2">{{ props.title }}</h3>
+      <div class="t-mb-1">
+        <NProgress
+          :percentage="percentage"
+          :status="percentageStatus"
+          :show-indicator="false"
+          type="line"
+        />
       </div>
-    </template>
+      <div :class="styledProgress">{{ outputString }}</div>
+    </div>
   </NCard>
 </template>
 
@@ -154,14 +153,6 @@ const styledProgress = computed(() => ({
 }));
 
 function updateCountdown(): void {
-  console.log(
-    daysDiff.value,
-    hoursDiff.value,
-    minutesDiff.value,
-    secondsDiff.value,
-    milliDiff.value
-  );
-
   if (milliDiff.value !== 0) milliDiff.value -= 1000;
   else {
     clearInterval(counterId.value);

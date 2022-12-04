@@ -9,11 +9,14 @@ import {
   NEllipsis,
   NIcon,
   useDialog,
+  useMessage,
+  useLoadingBar,
 } from "naive-ui";
 import { h, type Component, ref, reactive, watch, computed } from "vue";
 import FileAttachement from "@/components/utils/fileAttachement.vue";
 import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
 import { useIcon } from "@/composables/useIcon";
+import { AxiosInstance } from "@/axios";
 
 interface ContentItemProps {
   id: number;
@@ -31,6 +34,9 @@ const emits = defineEmits<{
   (e: "edit", item: Omit<ContentItemProps, "editable" | "lastUpdated">): void;
 }>();
 const dialog = useDialog();
+const loading = useLoadingBar();
+const messenger = useMessage();
+
 const itemFiles = ref<string[]>(props.fileUrls);
 
 const iconUtils = useIcon();
@@ -46,10 +52,6 @@ const headerIcon = computed(() =>
 
 // TODO: supply functions that trigger deletion or editing of content files
 
-function updateFiles() {
-  // TODO: open a popup to edit the files
-}
-
 function editItem() {
   emits("edit", {
     title: itemState.title,
@@ -60,13 +62,21 @@ function editItem() {
   });
 }
 
-function toggleContentForSection() {
-  itemState.visible = !itemState.visible;
-}
-
-function toggleContentForAll() {
-  itemState.visible = !itemState.visible;
-  // TODO: api call to toggle all other items in the same group
+async function toggleContentForSection() {
+  try {
+    loading.start();
+    await AxiosInstance.patch("content/" + props.id, {
+      visible: +!itemState.visible,
+    });
+    messenger.success(
+      `Content ${itemState.visible ? "hidden" : "revealed"} successfully`
+    );
+    loading.finish();
+    itemState.visible = !itemState.visible;
+  } catch (e) {
+    loading.error();
+    messenger.error("Content visibility update failed");
+  }
 }
 
 function deleteFile(fileURL: string) {
@@ -77,7 +87,10 @@ function deleteFile(fileURL: string) {
     positiveText: "Confirm",
     negativeText: "Cancel",
     maskClosable: true,
-    onPositiveClick: () => {
+    onPositiveClick: async () => {
+      await AxiosInstance.put("content/file/" + props.id, {
+        target: fileURL.replace(/.*\//g, ""),
+      });
       itemFiles.value = itemFiles.value.filter((url) => url !== fileURL);
     },
     onMaskClick: () => {},
@@ -113,7 +126,11 @@ function deleteFile(fileURL: string) {
               >{{ itemState.title }}</NEllipsis
             >
           </span>
-          <span v-if="props.editable" name="editing-bar">
+          <span
+            class="t-min-w-[120px]"
+            v-if="props.editable"
+            name="editing-bar"
+          >
             <NButton
               class="t-mr-2"
               @click="$emit('delete', props.id)"
@@ -143,7 +160,6 @@ function deleteFile(fileURL: string) {
             </NButton>
             <VisibilityDropdown
               :visible="itemState.visible"
-              @group-toggle="toggleContentForAll"
               @single-toggle="toggleContentForSection"
             ></VisibilityDropdown>
           </span>
@@ -177,7 +193,7 @@ function deleteFile(fileURL: string) {
           :class="`t-font-medium ${
             itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
           }`"
-          >{{ itemState.lastUpdated }}</span
+          >{{ new Date(itemState.lastUpdated).toLocaleString() }}</span
         >
       </div>
     </template>

@@ -1,5 +1,5 @@
 <template>
-  <NBreadcrumb class="t-mb-5">
+  <NBreadcrumb class="t-mb-5 dark:t-text-white">
     <NBreadcrumbItem
       v-for="option in breadCrumb.state.options"
       :key="option.path"
@@ -15,12 +15,5 @@ import { NBreadcrumb, NBreadcrumbItem } from "naive-ui";
 import { watch } from "vue";
 
 const breadCrumb = useBreadCrumb();
-
-watch(
-  () => breadCrumb.state.options,
-  () => {
-    console.log(breadCrumb.state.options);
-  }
-);
 </script>
 <style lang=""></style>

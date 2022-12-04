@@ -1,6 +1,8 @@
 <template>
   <NDropdown :options="profileOptions" @select="handleSelect">
-    <span class="t-inline-flex t-flex-row t-p-4 t-items-center t-w-fit">
+    <span
+      class="t-inline-flex t-flex-row t-p-4 t-items-center t-w-fit dark:t-text-white"
+    >
       <span>
         <NAvatar
           class="t-flex t-items-center"
@@ -30,7 +32,7 @@ import {
 import router from "@/router";
 import { useIcon } from "@/composables/useIcon";
 import { useAuth } from "@/stores/auth";
-
+import type { Role } from "@/enums/roles";
 const iconUtils = useIcon();
 const auth = useAuth();
 
@@ -63,7 +65,7 @@ const profileOptions = [
 const props = defineProps<{
   name: string;
   username: string;
-  role: number;
+  role: Role;
   photoUrl: string;
 }>();
 

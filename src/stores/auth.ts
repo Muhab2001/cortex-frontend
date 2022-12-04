@@ -1,7 +1,7 @@
 import type { User } from "typings/globals";
 import { defineStore } from "pinia";
 import { reactive, readonly } from "vue";
-import { Role } from "@/enums/roles";
+import { Role, RoleMap } from "@/enums/roles";
 
 import { AxiosInstance } from "@/axios";
 
@@ -11,8 +11,7 @@ export const useAuth = defineStore("auth", () => {
     fullname: "",
     photoUrl: "",
     // ! should default to a student
-    role: Role.STUDENT,
-    id: 0,
+    role: Role.UNSET,
   });
 
   // TODO proper fetching for the token
@@ -25,8 +24,8 @@ export const useAuth = defineStore("auth", () => {
       lastName: string;
       username: string;
       photoUrl: string;
-      role: Role;
-      id: number;
+      role: number;
+      id: number
     } = (
       await AxiosInstance.post(
         "/refresh",
@@ -40,13 +39,13 @@ export const useAuth = defineStore("auth", () => {
     ).data;
 
     AxiosInstance.defaults.headers.common = {
-      Authentication: `Bearer ${access_token}`,
+      Authorization: `Bearer ${access_token}`,
     };
 
     userProfile.username = response.username;
     userProfile.photoUrl = "http://localhost:3000/" + response.photoUrl;
-    userProfile.role = response.role;
-    userProfile.id = response.id;
+    userProfile.role = RoleMap[response.role];
+
     userProfile.fullname = response.firstName + " " + response.lastName;
   }
 
@@ -57,7 +56,7 @@ export const useAuth = defineStore("auth", () => {
       access_token: string;
       username: string;
       photoUrl: string;
-      role: Role;
+      role: number;
       id: number;
     } = (
       await AxiosInstance.post("/login", {
@@ -67,27 +66,26 @@ export const useAuth = defineStore("auth", () => {
     ).data;
 
     AxiosInstance.defaults.headers.common = {
-      Authentication: `Bearer ${response.access_token}`,
+      Authorization: `Bearer ${response.access_token}`,
     };
     sessionStorage.setItem("accessToken", response.access_token);
     // store the token in localStorage
     // populate the state
     userProfile.username = username;
     userProfile.photoUrl = "http://localhost:3000/" + response.photoUrl;
-    userProfile.role = response.role;
-    userProfile.id = response.id;
+    userProfile.role = RoleMap[response.role];
+
     userProfile.fullname = response.name;
   }
 
   function logout(): void {
     userProfile.username = "";
     userProfile.photoUrl = "";
-    userProfile.role = 1;
-    userProfile.id = 0;
+    userProfile.role = Role.UNSET;
 
     // remove the token from axios headers
     AxiosInstance.defaults.headers.common = {
-      Authentication: null,
+      Authorization: null,
     };
     sessionStorage.removeItem("accessToken");
   }

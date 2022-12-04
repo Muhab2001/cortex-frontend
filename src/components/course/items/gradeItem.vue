@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useIcon } from "@/composables/useIcon";
 import { CommentMultiple24Filled, Star20Filled } from "@vicons/fluent";
-import { NCard, NEllipsis, NDivider, NTag, NIcon } from "naive-ui";
+import { NCard, NEllipsis, NDivider, NTag, NIcon, NText } from "naive-ui";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
 interface GradeItemProps {
   title: string;
-  lastUpdated?: string;
+  lastUpdated: string;
   score?: number;
   maxScore: number;
   comment?: string;
@@ -42,7 +42,7 @@ const gradeType = (): "success" | "warning" | "error" | "default" => {
 <template>
   <NCard
     hoverable
-    class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer t-border-solid t-border-[2px] t-border-gray-200"
+    class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer t-border-solid t-border-[2px]"
     content-style="display:flex; align-items: center; padding: 12px; flex-direction: column; padding-bottom: 1px"
     footer-style="padding-bottom: 6px"
   >
@@ -79,7 +79,7 @@ const gradeType = (): "success" | "warning" | "error" | "default" => {
           :component="CommentMultiple24Filled"
           class="t-mr-2"
         />
-        <span class="t-text-gray-600 t-font-medium">Comment</span></NDivider
+        <NText class="t-font-medium">Comment</NText></NDivider
       >
       <p
         icon-placement="left"
@@ -94,7 +94,7 @@ const gradeType = (): "success" | "warning" | "error" | "default" => {
         <NDivider class="t-py-0 t-my-2"></NDivider>
         <span class="t-font-thin t-mr-2">Last Updated </span>
         <span class="t-font-medium t-text-blue-400">{{
-          props.lastUpdated
+          new Date(props.lastUpdated).toLocaleString()
         }}</span>
       </div>
     </template>

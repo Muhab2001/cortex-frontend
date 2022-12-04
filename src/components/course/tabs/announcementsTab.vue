@@ -1,13 +1,25 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { reactive, ref, onBeforeMount } from "vue";
 import AnnouncementItem from "@/components/course/items/AnnouncementItem.vue";
 
 import type { AnnouncementItemProps, SectionTab } from "typings/CourseViewTabs";
 import { Icon } from "@vicons/utils";
-import { Speaker032Filled, AddCircle24Filled } from "@vicons/fluent";
-import { NCard, useDialog, NButton, NDivider, NIcon } from "naive-ui";
+import {
+  Speaker032Filled,
+  AddCircle24Filled,
+  EmojiSurprise20Filled,
+} from "@vicons/fluent";
+import {
+  NCard,
+  useDialog,
+  NButton,
+  NDivider,
+  NIcon,
+  useMessage,
+} from "naive-ui";
 import type { Role } from "@/enums/roles";
 import AnnouncementModal from "../utils/AnnouncementModal.vue";
+import { AxiosInstance } from "@/axios";
 
 interface SectionTabProps {
   sectionId: number;
@@ -24,6 +36,7 @@ interface EditedItemProps {
 const props = defineProps<SectionTabProps>();
 // modal state
 const dialog = useDialog();
+const messenger = useMessage();
 const modalState = reactive<{
   visible: boolean;
   mode: "create" | "edit";
@@ -33,18 +46,17 @@ const modalState = reactive<{
   mode: "create",
 });
 
-// TODO initialize according to given params
-const items = ref<AnnouncementItemProps[]>([
-  {
-    id: 1,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Midterm Seating plan!",
-    tag: "Seating plan",
+const items = ref<AnnouncementItemProps[]>([]);
 
-    description:
-      "You can find below the full seating plan for our midterm exam. It will be on Biulding 54 'Slaughtery house, at 7:00pm'",
-  },
-]);
+async function fetchItems() {
+  items.value = (
+    await AxiosInstance.get("/announcements/section/" + props.sectionId)
+  ).data;
+}
+
+onBeforeMount(async () => {
+  await fetchItems();
+});
 
 function deleteItem(itemID: number) {
   // display the confirmation dialog
@@ -54,8 +66,10 @@ function deleteItem(itemID: number) {
     positiveText: "Confirm",
     negativeText: "Cancel",
     maskClosable: true,
-    onPositiveClick: () => {
+    onPositiveClick: async () => {
+      await AxiosInstance.delete("announcements/" + itemID);
       items.value = items.value.filter((item) => item.id !== itemID);
+      messenger.success("Announcement Deleted successfully");
     },
     onMaskClick: () => {},
     onEsc: () => {},
@@ -76,13 +90,18 @@ function showModal() {
 </script>
 <template>
   <AnnouncementModal
-    @closed="modalState.visible = false"
+    @closed="
+      async () => {
+        modalState.visible = false;
+        await fetchItems();
+      }
+    "
     :visible="modalState.visible"
     :mode="modalState.mode"
     :target-item="modalState.editedItem"
   />
   <NCard
-    class="t-border-solid t-border-[2px] t-border-gray-200"
+    class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
   >
@@ -105,29 +124,43 @@ function showModal() {
         <span class="t-text-lg t-font-semibold">Announcements</span>
       </div>
       <NButton
+        secondary
+        strong
         @click="showModal"
         class="t-w-full t-mt-0 md:t-mt-3 t-mb-5 md:t-mb-0"
         type="info"
         ><span
           ><NIcon class="t-mr-3" size="20"
             ><Icon><AddCircle24Filled></AddCircle24Filled></Icon></NIcon></span
-        ><span>Create Announcement</span></NButton
+        ><span>New Announcement</span></NButton
       >
       <NDivider class="t-hidden md:t-flex"></NDivider>
     </template>
     <!-- main card content -->
     <div class="t-columns-1">
-      <template v-for="item in items" :key="item.id">
-        <AnnouncementItem
-          @delete="deleteItem"
-          @edit="updateItem"
-          editable
-          :content="item.description"
-          :subject="item.title"
-          :lastUpdated="item.lastUpdated"
-          :tag="item.tag"
-          :id="item.id"
-        />
+      <template v-if="items.length !== 0">
+        <template v-for="item in items" :key="item.id">
+          <AnnouncementItem
+            @delete="deleteItem"
+            @edit="updateItem"
+            editable
+            :content="item.description"
+            :subject="item.title"
+            :updatedAt="item.updatedAt"
+            :tag="item.tag"
+            :id="item.id"
+          />
+        </template>
+      </template>
+      <template v-else>
+        <div
+          class="t-text-gray-500 t-mb-3 t-py-10 t-flex t-flex-col t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+        >
+          <NIcon class="t-pb-0" size="30" :component="EmojiSurprise20Filled" />
+          <NText class="t-text-gray-500 t-font-medium"
+            >You haven't issued any announcements to this section yet!</NText
+          >
+        </div>
       </template>
     </div>
   </NCard>

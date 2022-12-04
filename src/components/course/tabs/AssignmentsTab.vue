@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { reactive, ref, onBeforeMount } from "vue";
 import type { AssignmentItemProps } from "typings/CourseViewTabs";
 import AssignmentItem from "@/components/course/items/AssignmentItem.vue";
 
@@ -9,10 +9,20 @@ import { Icon } from "@vicons/utils";
 import {
   AddCircle24Filled,
   ClipboardBulletListLtr20Filled,
+  EmojiSurprise20Filled,
 } from "@vicons/fluent";
-import { NCard, NButton, NDivider, NIcon, useDialog } from "naive-ui";
+import {
+  NCard,
+  NButton,
+  NDivider,
+  NIcon,
+  useDialog,
+  useMessage,
+} from "naive-ui";
 import AssignmentModal from "../utils/AssignmentModal.vue";
 import SubmissionModal from "../utils/SubmissionModal.vue";
+import { AxiosInstance } from "@/axios";
+import { id } from "date-fns/esm/locale";
 interface SectionTabProps {
   sectionId: number;
   role: Role;
@@ -23,14 +33,16 @@ interface EditedItemProps {
   title: string;
   description?: string;
   deadline: number;
-  maxPoints: number;
+  maxScore: number;
   submissions?: number;
   fileUrls: string[];
   visible: boolean;
   isUnlimited: boolean;
+  isSubmittable: boolean;
 }
 
 const dialog = useDialog();
+const messenger = useMessage();
 const assignmentModalState = reactive<{
   visible: boolean;
   mode: "create" | "edit";
@@ -52,41 +64,17 @@ const submissionModalState = reactive<{
 
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
-const items = ref<AssignmentItemProps[]>([
-  {
-    id: 1,
-    deadline: Date.now(),
-    maxPoints: 20,
-    title: "Project Phase 3",
-    lastUpdated: new Date().toLocaleString(),
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-    visible: true,
-    description: "This is the assignment for the third project phase",
-    submissions: 3,
-    submissionsLeft: 2,
-    isSubmitted: true,
-    isUnlimited: false,
-  },
-  {
-    id: 2,
-    deadline: Date.now(),
-    maxPoints: 20,
-    title: "Assignment #3",
-    lastUpdated: new Date().toLocaleString(),
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-    visible: true,
-    description: "This is the assignment for the third project phase",
-    isUnlimited: true,
-    isSubmitted: false,
-  },
-]);
+const assignmentSheet = reactive<{ records: AssignmentItemProps[] }>({
+  records: [],
+});
 
+onBeforeMount(async () => {
+  assignmentSheet.records = (
+    await AxiosInstance.get(`assignments/${props.role}/${props.sectionId}`)
+  ).data;
+
+  assignmentSheet.records.forEach((item) => console.log(item));
+});
 function deleteItem(itemID: number) {
   // display the confirmation dialog
   dialog.warning({
@@ -95,8 +83,16 @@ function deleteItem(itemID: number) {
     positiveText: "Confirm",
     negativeText: "Cancel",
     maskClosable: true,
-    onPositiveClick: () => {
-      items.value = items.value.filter((item) => item.id !== itemID);
+    onPositiveClick: async () => {
+      try {
+        await AxiosInstance.delete("/assignments/" + itemID);
+        assignmentSheet.records = assignmentSheet.records.filter(
+          (item) => item.id !== itemID
+        );
+        messenger.success("Assignment Deleted Successfully");
+      } catch (e) {
+        messenger.error("Assignment Deletion failed");
+      }
     },
     onMaskClick: () => {},
     onEsc: () => {},
@@ -115,11 +111,39 @@ function showAssignmentModal() {
   assignmentModalState.visible = true;
 }
 
+function closeAssignmentModal(item?: {
+  id: number;
+  title: string;
+  description?: string;
+  deadline: number;
+  visible: boolean;
+  isUnlimited: boolean;
+  maxScore: number;
+}) {
+  console.log(item);
+
+  assignmentModalState.visible = false;
+  if (item !== undefined) {
+    console.log("INSIDE");
+    const targetIndex = assignmentSheet.records.findIndex(
+      (record) => record.id === item.id
+    );
+
+    // assignmentSheet.records = [...newRecords];
+    assignmentSheet.records[targetIndex] = {
+      ...assignmentSheet.records[targetIndex],
+      ...item,
+    };
+  }
+}
+
 function showSubmissionModal(
   title: string,
   assignmnentId: number,
   description?: string
 ) {
+  console.log(assignmnentId, title, description);
+
   submissionModalState.title = title;
   submissionModalState.description = description;
   submissionModalState.assignmentId = assignmnentId;
@@ -132,11 +156,7 @@ function showSubmissionModal(
     :mode="assignmentModalState.mode"
     :visible="assignmentModalState.visible"
     :target-item="assignmentModalState.editedItem"
-    @closed="
-      () => {
-        assignmentModalState.visible = false;
-      }
-    "
+    @closed="closeAssignmentModal"
   />
   <SubmissionModal
     :v-if="props.role == Role.STUDENT"
@@ -144,7 +164,7 @@ function showSubmissionModal(
     @closed="submissionModalState.visible = false"
   />
   <NCard
-    class="t-border-solid t-border-[2px] t-border-gray-200"
+    class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
   >
@@ -161,6 +181,8 @@ function showSubmissionModal(
         <span class="t-text-lg t-font-semibold">Assignments</span>
       </div>
       <NButton
+        secondary
+        strong
         :v-if="props.role == Role.INSTRUCTOR"
         @click="showAssignmentModal"
         class="t-w-full t-mt-0 md:t-mt-3 t-mb-5 md:t-mb-0"
@@ -174,29 +196,42 @@ function showSubmissionModal(
     </template>
     <!-- main card content -->
 
-    <div class="t-columns-1 lg:t-columns-2">
-      <template v-for="item in items" :key="item.id">
-        <AssignmentItem
-          :section-id="props.sectionId"
-          @edit="updateItem"
-          @delete="deleteItem"
-          @submit="showSubmissionModal"
-          :id="item.id"
-          :deadline="item.deadline"
-          :editable="props.role == Role.INSTRUCTOR"
-          :maxPoints="item.maxPoints"
-          :description="item.description"
-          :title="item.title"
-          :lastUpdated="item.lastUpdated"
-          :visible="item.visible"
-          :file-urls="item.fileUrls"
-          :submissions="item.submissions"
-          :submissions-left="item.submissionsLeft"
-          :is-submitted="item.isSubmitted"
-          :is-unlimited="item.isUnlimited"
-        />
-      </template>
-    </div>
+    <template v-if="assignmentSheet.records.length !== 0">
+      <div class="t-columns xl:t-columns-2">
+        <template v-for="item in assignmentSheet.records" :key="item">
+          <AssignmentItem
+            :section-id="props.sectionId"
+            @edit="updateItem"
+            @delete="deleteItem"
+            @submit="showSubmissionModal"
+            :id="item.id"
+            :deadline="item.deadline"
+            :editable="props.role == Role.INSTRUCTOR"
+            :maxScore="item.maxPoints"
+            :description="item.description"
+            :title="item.title"
+            :updatedAt="item.updatedAt"
+            :visible="Boolean(item.visible)"
+            :file-urls="item.fileUrls"
+            :submissions="item.submissions"
+            :submissions-left="item.submissionsLeft"
+            :is-submitted="item.isSubmitted"
+            :is-unlimited="item.isUnlimited"
+            :is-submittable="item.isSubmittable"
+          />
+        </template>
+      </div>
+    </template>
+    <template v-else>
+      <div
+        class="t-text-gray-500 t-mb-3 t-py-10 t-flex t-flex-col t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+      >
+        <NIcon class="t-pb-0" size="30" :component="EmojiSurprise20Filled" />
+        <NText class="t-text-gray-500 t-font-medium"
+          >You haven't assigned any assignments to this section yet!</NText
+        >
+      </div>
+    </template>
   </NCard>
 </template>
 

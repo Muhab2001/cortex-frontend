@@ -1,6 +1,6 @@
 <template>
   <NCard
-    class="t-border-solid t-border-[2px] t-border-gray-200"
+    class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0"
   >
@@ -23,7 +23,7 @@
         <GradeItem
           :id="item.id"
           :title="item.title"
-          :lastUpdated="item.lastUpdated"
+          :lastUpdated="item.updatedAt"
           :score="item.score"
           :maxScore="item.maxPoints"
           :comment="item.comment"
@@ -33,12 +33,13 @@
   </NCard>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
 import type { GradeItemProps } from "typings/CourseViewTabs";
 import GradeItem from "../items/GradeItem.vue";
 import { Icon } from "@vicons/utils";
 import { Star20Filled } from "@vicons/fluent";
 import { NCard, NDivider } from "naive-ui";
+import { AxiosInstance } from "@/axios";
 
 interface SectionTabProps {
   sectionId: number;
@@ -47,30 +48,43 @@ interface SectionTabProps {
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
 const items = ref<GradeItemProps[]>([
-  {
-    id: 1,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Project Phase #2",
-    score: 20,
-    maxPoints: 20,
-    comment: "Well done Muhab, this assignment submission was splendid!",
-  },
-  {
-    id: 2,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Project Phase #3",
-    score: 13,
-    maxPoints: 20,
-  },
-  {
-    id: 3,
-    lastUpdated: new Date().toLocaleString(),
-    title: "Homework #2",
-    comment:
-      "Your code is not working. Please test your code in later assignments. Good luck :-)",
-    score: 4,
-    maxPoints: 10,
-  },
+  // {
+  //   id: 1,
+  //   updatedAt: new Date().toLocaleString(),
+  //   title: "Project Phase #2",
+  //   score: 20,
+  //   maxPoints: 20,
+  //   comment: "Well done Muhab, this assignment submission was splendid!",
+  // },
+  // {
+  //   id: 2,
+  //   updatedAt: new Date().toLocaleString(),
+  //   title: "Project Phase #3",
+  //   score: 13,
+  //   maxPoints: 20,
+  // },
+  // {
+  //   id: 3,
+  //   updatedAt: new Date().toLocaleString(),
+  //   title: "Homework #2",
+  //   comment:
+  //     "Your code is not working. Please test your code in later assignments. Good luck :-)",
+  //   score: 4,
+  //   maxPoints: 10,
+  // },
 ]);
+
+onBeforeMount(async () => {
+  items.value = (
+    await AxiosInstance.get("grades/student/" + props.sectionId)
+  ).data.map((grade: any) => ({
+    title: grade.title,
+    id: grade.id,
+    updatedAt: grade.updatedAt,
+    score: grade.score,
+    maxPoints: grade.assignment.maxPoints,
+    comment: grade.comment,
+  }));
+});
 </script>
 <style></style>

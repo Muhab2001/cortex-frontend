@@ -8,7 +8,7 @@
     transform-origin="center"
     content-style="padding-bottom: 0px"
     preset="card"
-    class="t-w-full md:t-w-[80%]"
+    class="t-w-full md:t-w-[80%] t-max-w-7xl"
     @close="$emit('closed')"
     size="large"
   >
@@ -27,7 +27,9 @@
     </template>
     <NDivider class="t-my-0"></NDivider>
     <h2 class="t-py-4 t-pb-0 t-font-medium">{{ props.name }}'s Submissions</h2>
-    <p class="t-text-gray-500 t-mb-5">Submissions submitted by the student</p>
+    <p class="t-text-gray-500 dark:t-text-gray-400 t-mb-5">
+      Submissions submitted by the student
+    </p>
     <!-- submission info section -->
     <section v-if="submissions.length != 0" class="t-mb-3">
       <SubmissionItem
@@ -40,8 +42,15 @@
       v-else
       class="t-mb-3 t-text-gray-500 t-flex t-flex-col t-items-center"
     >
-      <NIcon size="30" class="t-mb-2" :component="EmojiSad16Filled" />
-      <NText>No Submissions recieved</NText>
+      <NIcon
+        size="30"
+        class="t-mb-2"
+        color="rgb(251 146 60)"
+        :component="EmojiSad16Filled"
+      />
+      <NText class="t-text-orange-400 t-font-semibold t-text-md"
+        >No Submissions recieved</NText
+      >
     </section>
     <!-- form section -->
     <NForm :rules="rules" ref="formRef" :model="modelRef">
@@ -60,7 +69,11 @@
           v-model:value="modelRef.comment"
         ></NInput>
       </NFormItem>
-      <NFormItem class="t-mt-4" label="Score" path="score">
+      <NFormItem
+        class="t-mt-4"
+        :label="`Score (out of ${props.maxScore})`"
+        path="score"
+      >
         <NInputNumber
           placeholder="Enter a brief description"
           path="score"
@@ -69,8 +82,42 @@
           :min="0"
           :max="props.maxScore"
           v-model:value="modelRef.score"
-        ></NInputNumber> </NFormItem
-    ></NForm>
+        ></NInputNumber>
+      </NFormItem>
+      <NFormItem
+        class="t-my-4"
+        :label-style="{
+          fontWeight: 'bolder',
+        }"
+        label="Grade Visibility"
+        path="visible"
+        feedback="Toggle the visibility of this grade to the student"
+      >
+        <NSwitch
+          class="t-pt-0 t-h-10"
+          :round="false"
+          v-model:value="modelRef.visible"
+          :rail-style="railStyle"
+        >
+          <template #checked
+            ><div>
+              <NIcon class="t-mr-1">
+                <Icon>
+                  <Eye20Filled></Eye20Filled>
+                </Icon> </NIcon
+              ><span>Visible</span>
+            </div></template
+          >
+          <template #unchecked
+            ><div>
+              <NIcon class="t-mr-1"
+                ><Icon><EyeOff16Filled></EyeOff16Filled></Icon></NIcon
+              ><span>Hidden</span>
+            </div></template
+          >
+        </NSwitch>
+      </NFormItem></NForm
+    >
     <NDivider class="t-mt-0" />
     <template #footer>
       <NButton
@@ -86,7 +133,13 @@
   </NModal>
 </template>
 <script setup lang="ts">
-import { EmojiSad16Filled, Star20Filled } from "@vicons/fluent";
+import { AxiosInstance } from "@/axios";
+import {
+  EmojiSad16Filled,
+  Eye20Filled,
+  EyeOff16Filled,
+  Star20Filled,
+} from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
 import {
   NButton,
@@ -97,13 +150,15 @@ import {
   NFormItem,
   NInput,
   NModal,
+  NSwitch,
   NText,
   useMessage,
+  useLoadingBar,
   type FormInst,
   type FormRules,
   type FormValidationError,
 } from "naive-ui";
-import { ref, type Ref } from "vue";
+import { ref, type Ref, watch, type CSSProperties } from "vue";
 import SubmissionItem from "../items/SubmissionItem.vue";
 
 interface Submission {
@@ -116,54 +171,35 @@ interface Submission {
 interface GradeModel {
   score: number;
   comment?: string;
+  visible: boolean;
 }
 
 interface GradeModalProps {
   title: string;
-  visible: boolean;
-  score?: number;
+  gradeId: number;
   assignmentId: number;
-  studentId: string;
+  studentId: number;
+  visible: boolean;
   maxScore: number;
   name: string;
 }
 
 const props = defineProps<GradeModalProps>();
 const emits = defineEmits<{
-  (e: "closed"): void;
+  (e: "closed", newScore?: number, gradeId?: number): void;
 }>();
 const messenger = useMessage();
+const loading = useLoadingBar();
 
 // form state
 const formRef = ref<FormInst | null>(null);
 const modelRef = ref<GradeModel>({
   score: 0,
   comment: "",
+  visible: false,
 });
 
-// TODO: replace with an api call for submission details from student ID in assignment ID
-const submissions: Ref<Submission[]> = ref<Submission[]>([
-  {
-    count: 1,
-    submissionDate: new Date().toLocaleString(),
-    comment: "The UML class diagram is supplied in a different PDF file",
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-      "https://blackboard.kfupm.edu.sa/bbcswebdav/pid-1833278-dt-content-rid-22203929_1/courses/221-GS-318-merged-nawaf/182-GS-318-merged-nawaf_ImportedContent_20181225020849/Chapter%2024.pdf",
-    ],
-  },
-  {
-    count: 2,
-    submissionDate: new Date().toLocaleString(),
-  },
-  {
-    count: 3,
-    submissionDate: new Date().toLocaleString(),
-    fileUrls: [
-      "https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg",
-    ],
-  },
-]);
+const submissions: Ref<Submission[]> = ref<Submission[]>([]);
 
 const rules: FormRules = {
   comment: {
@@ -174,25 +210,67 @@ const rules: FormRules = {
   },
   score: {
     required: true,
-    type: "float",
+    type: "number",
     message: "You need to provide a score for the submission!",
     trigger: "blur",
     min: 0,
   },
+  visible: {
+    required: true,
+    type: "boolean",
+    trigger: "blur",
+  },
 };
+
+const railStyle = ({
+  focused,
+  checked,
+}: {
+  focused: boolean;
+  checked: boolean;
+}) => {
+  const style: CSSProperties = {};
+  if (!checked) style.background = "gray";
+
+  return style;
+};
+
+watch(
+  () => props.visible,
+  async () => {
+    if (props.visible) {
+      const grade = (await AxiosInstance.get("grades/" + props.gradeId)).data;
+      modelRef.value.comment = "";
+      modelRef.value.score = grade.score ?? null;
+      submissions.value = (
+        await AxiosInstance.get(`assignments/submissions/${props.assignmentId}`)
+      ).data;
+      modelRef.value.visible = Boolean(grade.visible);
+    }
+  }
+);
 
 function submitForm() {
   formRef.value?.validate(
     async (errors: Array<FormValidationError> | undefined) => {
       if (!errors) {
         try {
+          loading.start();
+          await AxiosInstance.post("grades/" + props.gradeId, {
+            score: modelRef.value.score,
+            comment: modelRef.value.comment,
+            visible: +modelRef.value.visible,
+          });
           messenger.success("Submission Graded Succesfully!");
+          loading.finish();
+          emits("closed", modelRef.value.score, props.gradeId);
         } catch (e: any) {
-          messenger.error("Assignment creation Failed!");
+          loading.error();
+          messenger.error("Grading failed");
         }
       } else {
         console.log(errors);
-        messenger.error("Login Failed!");
+        messenger.error("Grading failed");
       }
     }
   );

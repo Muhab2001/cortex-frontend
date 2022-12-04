@@ -13,13 +13,14 @@
           :course-id="courseInfo.courseId"
           :course-name="courseInfo.courseName"
           :section-id="3"
-          cover-url="https://images.unsplash.com/photo-1597852074816-d933c7d2b988?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8ZGF0YWJhc2VzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60"
           :section-num="courseInfo.sectionNo"
           instructor-img-url="https://cdn.pixabay.com/photo/2022/04/20/06/28/flowers-7144466__340.jpg"
         /><NButton
+          secondary
+          strong
           v-if="auth.userProfile.role == Role.INSTRUCTOR"
           @click="attendanceModal.visible = true"
-          class="t-w-full"
+          class="t-w-full t-mb-3"
           type="primary"
           ><template #icon><NIcon :component="CoPresentRound" /></template> Take
           Attendance</NButton
@@ -37,9 +38,11 @@
           </NButtonGroup>
         </section>
         <section
-          class="md:t-hidden t-border-t-2 t-border-t-solid t-shadow-2xl t-bg-white t-fixed t-bottom-0 t-left-0 t-z-50 t-h-fit t-w-full"
+          class="md:t-hidden t-border-t-2 t-border-t-solid t-shadow-2xl t-bg-white dark:t-bg-black t-fixed t-bottom-0 t-left-0 t-z-50 t-h-fit t-w-full"
         >
-          <NButtonGroup class="t-mx-auto t-px-2 t-bg-white t-w-full">
+          <NButtonGroup
+            class="t-mx-auto t-px-2 t-bg-white dark:t-bg-black t-w-full"
+          >
             <CourseMenuOption
               @switch-tab="switchTab"
               v-for="option in options"
@@ -96,21 +99,25 @@ import {
   defineAsyncComponent,
   ref,
   type Component,
-  watch,
+  watchEffect,
   provide,
   readonly,
+  onBeforeMount,
   reactive,
 } from "vue";
 import { useBreadCrumb } from "@/stores/breadcrump";
 import { NButtonGroup, NButton, NIcon } from "naive-ui";
 import { CoPresentRound } from "@vicons/material";
-import AttendanceModal from "@/components/course/utils/AttendanceModal.vue";
+import { AxiosInstance } from "@/axios";
 
 const InstructorSlot = defineAsyncComponent(
   () => import("./slots/InstructorSlot.vue")
 );
 const StudentSlot = defineAsyncComponent(
   () => import("./slots/StudentSlot.vue")
+);
+const AttendanceModal = defineAsyncComponent(
+  () => import("@/components/course/utils/AttendanceModal.vue")
 );
 
 interface CourseViewProps {
@@ -131,7 +138,9 @@ const props = defineProps<CourseViewProps>();
 const auth = useAuth();
 
 // local state
-const tab = ref<SectionTab>("Assignments");
+const tab = ref<SectionTab>(
+  (sessionStorage.getItem("courseTab") as SectionTab) ?? "Assignments"
+);
 
 const attendanceModal = ref<{ visible: boolean; sectionId: number }>({
   visible: false,
@@ -139,44 +148,49 @@ const attendanceModal = ref<{ visible: boolean; sectionId: number }>({
 });
 
 // TODO: replace with an API call
-const courseInfo = reactive({
-  courseName: "Management of Database Systems",
-  courseId: "ICS321",
-  sectionNo: 3,
-  sectionId: props.sectionId,
-  term: "221",
+const courseInfo = ref<{
+  term: string;
+  courseId: string;
+  courseName: string;
+  sectionNo: number | string;
+}>({
+  courseName: "",
+  courseId: "",
+  sectionNo: props.sectionId,
+  term: "",
 });
-// providing course meta info to all children
-provide(
-  CourseMeta,
-  readonly({
-    courseName: courseInfo.courseName,
-    courseId: courseInfo.courseId,
-    sectionNo: courseInfo.sectionNo,
-    term: courseInfo.term,
-  })
-);
 
-watch(
-  () => tab,
-  () => {
-    console.log(tab, auth.userProfile);
-  }
-);
+onBeforeMount(async () => {
+  const response = (
+    await AxiosInstance.get("course/section/" + props.sectionId)
+  ).data;
+
+  courseInfo.value.courseName = response.course.courseName;
+  courseInfo.value.courseId = response.course.id;
+  courseInfo.value.sectionNo = response.section_number;
+  courseInfo.value.term = response.term;
+
+  // providing course meta info to all children
+  breadcrumbs.updateOptions([
+    {
+      label: "Home",
+      path: "/home",
+    },
+    {
+      label: `${courseInfo.value.courseId}-${courseInfo.value.sectionNo}`,
+      path: `/course/${props.sectionId}`,
+    },
+  ]);
+});
+
+provide(CourseMeta, readonly(courseInfo));
+
+watchEffect(() => {
+  sessionStorage.setItem("courseTab", tab.value);
+});
 
 // breadcrumbs state
 const breadcrumbs = useBreadCrumb();
-
-breadcrumbs.updateOptions([
-  {
-    label: "Home",
-    path: "/home",
-  },
-  {
-    label: `${courseInfo.courseId}-${courseInfo.sectionNo}`,
-    path: `/course/${props.sectionId}`,
-  },
-]);
 
 const options: CourseOption[] = [
   {
@@ -203,14 +217,14 @@ const options: CourseOption[] = [
 
 // instructor can access the grades through the assignment page
 // TODO: revert to students' only view
-// if (true) {
-options.push({
-  label: "Grades",
-  iconBG: "t-bg-[#ffee57]",
-  iconFill: "#da9351",
-  icon: Star20Filled,
-});
-// }
+if (auth.userProfile.role == Role.STUDENT) {
+  options.push({
+    label: "Grades",
+    iconBG: "t-bg-[#ffee57]",
+    iconFill: "#da9351",
+    icon: Star20Filled,
+  });
+}
 
 function switchTab(label: string): void {
   console.log("FINALLY!", tab.value);

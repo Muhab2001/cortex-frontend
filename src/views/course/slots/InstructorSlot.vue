@@ -26,20 +26,29 @@
 </template>
 
 <script setup lang="ts">
-import AnnouncementsTab from "@/components/course/tabs/AnnouncementsTab.vue";
-import AssignmentsTab from "@/components/course/tabs/AssignmentsTab.vue";
-import ContentTabVue from "@/components/course/tabs/ContentTab.vue";
-import GradesTab from "@/components/course/tabs/GradesTab.vue";
 import type { Role } from "@/enums/roles";
 import { useAuth } from "@/stores/auth";
 import type { SectionTab } from "typings/CourseViewTabs";
-import { watch } from "vue";
+import { watch, defineAsyncComponent } from "vue";
 
 interface SectionSlotProps {
   sectionId: number;
   role: Role;
   tab: SectionTab;
 }
+
+const AnnouncementsTab = defineAsyncComponent(
+  () => import("@/components/course/tabs/AnnouncementsTab.vue")
+);
+const AssignmentsTab = defineAsyncComponent(
+  () => import("@/components/course/tabs/AssignmentsTab.vue")
+);
+const ContentTabVue = defineAsyncComponent(
+  () => import("@/components/course/tabs/ContentTab.vue")
+);
+const GradesTab = defineAsyncComponent(
+  () => import("@/components/course/tabs/GradesTab.vue")
+);
 
 const props = defineProps<SectionSlotProps>();
 const auth = useAuth();

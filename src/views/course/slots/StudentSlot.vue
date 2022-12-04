@@ -24,14 +24,24 @@
 <script setup lang="ts">
 // logic to handle tab state
 
-import { ref } from "vue";
-import ContentTabVue from "@/components/course/tabs/ContentTab.vue";
-import AssignmentsTab from "@/components/course/tabs/AssignmentsTab.vue";
-import GradesTab from "@/components/course/tabs/GradesTab.vue";
-import AnnouncementsTab from "@/components/course/tabs/AnnouncementsTab.vue";
+import { ref, defineAsyncComponent } from "vue";
+
 import { useAuth } from "@/stores/auth";
 import type { SectionTab } from "typings/CourseViewTabs";
 import type { Role } from "@/enums/roles";
+
+const AnnouncementsTab = defineAsyncComponent(
+  () => import("@/components/course/tabs/AnnouncementsTab.vue")
+);
+const AssignmentsTab = defineAsyncComponent(
+  () => import("@/components/course/tabs/AssignmentsTab.vue")
+);
+const ContentTabVue = defineAsyncComponent(
+  () => import("@/components/course/tabs/ContentTab.vue")
+);
+const GradesTab = defineAsyncComponent(
+  () => import("@/components/course/tabs/GradesTab.vue")
+);
 
 interface SectionSlotProps {
   sectionId: number;

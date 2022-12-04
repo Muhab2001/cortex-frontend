@@ -10,7 +10,7 @@
     transform-origin="center"
     content-style="padding-bottom: 0px"
     preset="card"
-    class="t-w-[80%]"
+    class="t-w-full md:t-w-[80%] t-max-w-7xl"
     @close="() => $emit('closed')"
     size="large"
     ><template #header>
@@ -29,15 +29,15 @@
       <div class="t-w-fit t-py-0 title-container">
         <div class="t-flex t-items-center">
           <span class="t-font-bold t-mr-2 t-text-xl t-text-blue-500">{{
-            courseMeta?.courseId
+            courseInfo?.courseId
           }}</span>
           <span
             class="t-text-sm t-font-medium t-bg-blue-200 t-py-[0.1rem] t-px-2 t-rounded-md t-text-blue-600"
-            >Term {{ courseMeta?.term }}</span
+            >Term {{ courseInfo?.term }}</span
           >
         </div>
         <NEllipsis class="t-text-lg" :line-clamp="1">{{
-          courseMeta?.courseName
+          courseInfo?.courseName
         }}</NEllipsis>
       </div>
     </div>
@@ -78,29 +78,37 @@
           v-model:value="modelRef.tag"
         />
       </NFormItem>
-      <h2 class="t-font-semibold t-mb-0 t-mt-3">Announcement Availability</h2>
-      <p class="t-mb-2">Choose targeted sections</p>
-      <NFormItem
-        v-if="props.mode === 'create'"
-        class="t-mt-4"
-        :label-style="{
-          fontWeight: 'bold',
-        }"
-        label="Sections"
-        path="sectionIds"
-      >
-        <NCheckboxGroup v-model:value="modelRef.sectionIds">
-          <NCheckbox
-            v-for="section in allSections"
-            :key="section"
-            :label="section.toString()"
-            :value="section"
-          ></NCheckbox>
-        </NCheckboxGroup> </NFormItem
-    ></NForm>
-    <NDivider class="t-mt-0" />
+      <section v-if="props.mode === 'create'">
+        <h2 class="t-font-semibold t-mb-0 t-mt-3">Announcement Availability</h2>
+        <p class="t-mb-2">Choose targeted sections</p>
+        <NFormItem
+          v-if="props.mode === 'create'"
+          class="t-mt-4"
+          :label-style="{
+            fontWeight: 'bold',
+          }"
+          label="Sections"
+          path="sectionIds"
+        >
+          <NCheckboxGroup v-model:value="modelRef.sectionIds">
+            <NCheckbox
+              v-for="section in courseSections"
+              :key="section"
+              :label="section.toString()"
+              :value="section"
+            ></NCheckbox>
+          </NCheckboxGroup>
+        </NFormItem>
+      </section>
+    </NForm>
+    <NDivider class="t-mt-4" />
     <template #footer>
-      <NButton @click="submitForm" class="t-mr-2" type="success"
+      <NButton
+        secondary
+        strong
+        @click="submitForm"
+        class="t-mr-2"
+        type="success"
         >Submit</NButton
       >
       <NButton @click="$emit('closed')" type="default">Cancel</NButton>
@@ -108,6 +116,7 @@
   >
 </template>
 <script setup lang="ts">
+import { AxiosInstance } from "@/axios";
 import { CourseMeta } from "@/injection_keys/courseView.keys";
 import { Speaker024Filled } from "@vicons/fluent";
 import {
@@ -126,23 +135,34 @@ import {
   NEllipsis,
   type FormValidationError,
   useMessage,
+  useLoadingBar,
 } from "naive-ui";
 import { ref, inject, watch, type Ref, computed } from "vue";
 
-interface Announcement {
+interface AnnouncementModel {
   subject: string;
   content: string;
   tag: string;
-  sectionIds?: number[]; // editing an announcement should not update target sections
+  sectionIds: number[];
+  id?: number;
+}
+
+// editing an announcement should not update target sections
+interface AnnouncementItem {
+  subject: string;
+  content: string;
+  tag: string;
+
+  id: number;
 }
 
 interface AnnouncementModalProps {
   visible: boolean;
   mode: "edit" | "create";
-  targetItem?: Announcement;
+  targetItem?: AnnouncementItem;
 }
 
-const modelRef = ref<Announcement>({
+const modelRef = ref<AnnouncementModel>({
   subject: "",
   content: "",
   tag: "",
@@ -155,11 +175,12 @@ const emits = defineEmits<{
 }>();
 
 const formRef = ref<FormInst | null>(null);
-const courseMeta = inject(CourseMeta);
+const courseInfo = inject(CourseMeta);
 const messenger = useMessage();
+const loading = useLoadingBar();
 
 // TODO: replace with an api call
-const allSections = [1, 2, 3];
+const courseSections = ref<number[]>([]);
 
 const rules: Ref<FormRules> = computed(() => ({
   subject: {
@@ -181,7 +202,7 @@ const rules: Ref<FormRules> = computed(() => ({
     trigger: ["blur"],
   },
   sectionIds: {
-    required: props.mode === "edit",
+    required: props.mode === "create",
     type: "array",
     validator(itemRule: FormItemRule, value: number[]) {
       console.log(value);
@@ -198,14 +219,21 @@ const rules: Ref<FormRules> = computed(() => ({
 
 watch(
   () => props.visible,
-  () => {
+  async () => {
     if (props.visible) {
+      courseSections.value = (
+        await AxiosInstance.get(
+          `/course/instructor/${courseInfo?.value.courseId}/${courseInfo?.value.term}`
+        )
+      ).data;
       if (props.mode === "edit") {
         modelRef.value = {
           subject: props.targetItem!.subject,
           content: props.targetItem!.content,
-          // replace with a fetch request to the api for all sections under the course in current term
-          sectionIds: props.targetItem?.sectionIds,
+          // replace with a fetch request to the api for all sections targeted by the announcement
+          sectionIds: await AxiosInstance.get(
+            "/course/sections/announcement/" + props.targetItem!.id
+          ),
           tag: props.targetItem!.tag,
         };
       } else if (props.mode === "create") {
@@ -228,8 +256,28 @@ const submitForm = () => {
     async (errors: Array<FormValidationError> | undefined) => {
       if (!errors) {
         // if no section is selected
+        if (props.mode === "create") {
+          await AxiosInstance.post("announcements", {
+            sectionIds: modelRef.value.sectionIds,
+            subject: modelRef.value.subject,
+            course: courseInfo?.value.courseId,
+            content: modelRef.value.content,
+            tag: modelRef.value.tag,
+          });
+          messenger.success("Announcement Created Successfully");
+        } else if (props.mode === "edit") {
+          await AxiosInstance.patch("announcements/" + props.targetItem!.id, {
+            subject: modelRef.value.subject,
+            content: modelRef.value.content,
+            tag: modelRef.value.tag,
+            courseId: courseInfo?.value.courseId,
+          });
+          messenger.success("Announcemend Updated successfully");
+        }
 
-        messenger.success("Submission Successful");
+        loading.finish();
+        emits("closed");
+
         // router.push("/home");
         // console.log(
         //   await axios.post("/login", {
@@ -240,6 +288,7 @@ const submitForm = () => {
       } else {
         console.log(errors);
         messenger.error("Submission Failed!");
+        loading.error();
       }
     }
   );

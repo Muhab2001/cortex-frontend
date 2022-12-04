@@ -3,7 +3,7 @@ import AnnouncementCard from "@/components/home/announcementCard.vue";
 import DeadlineCard from "@/components/home/deadlineCard.vue";
 import SectionCard from "@/components/home/sectionCard.vue";
 import ProfileCard from "@/components/utils/profileCard.vue";
-import { Role } from "@/enums/roles";
+import type { Role } from "@/enums/roles";
 import { AxiosInstance } from "@/axios";
 import { useAuth } from "@/stores/auth";
 import { useBreadCrumb } from "@/stores/breadcrump";
@@ -15,7 +15,7 @@ import {
   type DropdownOption,
   NButton,
   NIcon,
-  NSpace,
+  NCard,
   NText,
 } from "naive-ui";
 import { onMounted, ref, type Ref, onBeforeMount } from "vue";
@@ -60,12 +60,12 @@ const announcements = ref<AnnouncementProps[]>([]);
 
 onBeforeMount(async () => {
   try {
-    const target: "student" | "instructor" =
-      auth.userProfile.role === Role.INSTRUCTOR ? "instructor" : "student";
+    const target: Role = auth.userProfile.role;
+    console.log(target);
 
     // fetching for terms
     fetchedTermOptions.value = (
-      await AxiosInstance.get(`course/${target}/terms/${auth.userProfile.id}`)
+      await AxiosInstance.get(`course/${target}/terms`)
     ).data.map((term: string) => ({
       label: term,
       key: term,
@@ -75,21 +75,21 @@ onBeforeMount(async () => {
     // fetching sections
     sections.value = (
       await AxiosInstance.get(
-        `/course/${target}/${auth.userProfile.id}/${fetchedTermOptions.value[0].label}`
+        `/course/${target}/${fetchedTermOptions.value[0].label}`
       )
     ).data;
 
     // fetching the deadlines
     deadlines.value = (
       await AxiosInstance.get(
-        `/assignments/deadlines/${target}/${auth.userProfile.id}/${fetchedTermOptions.value[0].label}`
+        `/assignments/deadlines/${target}/${fetchedTermOptions.value[0].label}`
       )
     ).data;
 
     // fetching the announcements
     announcements.value = (
       await AxiosInstance.get(
-        `/announcements/${target}/${auth.userProfile.id}/${fetchedTermOptions.value[0].label}`
+        `/announcements/${target}/${fetchedTermOptions.value[0].label}`
       )
     ).data;
     console.log(announcements.value);
@@ -118,13 +118,13 @@ function selectTerm(key: number | string) {}
     <div class="md:t-flex">
       <section class="md:t-w-[66vw] md:t-mr-3">
         <div class="t-flex t-mb-3 t-items-center t-justify-between">
-          <span>
+          <span class="t-inline-flex t-items-center">
             <span
               class="t-bg-blue-200 t-p-2 t-inline-flex t-items-center t-rounded-md t-h-full t-mr-2"
               ><Icon size="20px" color="#0D4C92"><Book24Filled /> </Icon
             ></span>
             <h3
-              class="t-font-bold t-text-slate-700 t-inline t-h-full t-align-middle"
+              class="t-font-bold t-text-slate-700 t-inline t-h-full t-align-middle dark:t-text-white"
             >
               My Courses
             </h3>
@@ -167,7 +167,7 @@ function selectTerm(key: number | string) {}
               ><Icon size="20px" color="#285430"><Speaker024Filled /> </Icon
             ></span>
             <h3
-              class="t-font-bold t-text-slate-700 t-inline t-h-full t-align-middle"
+              class="t-font-bold t-text-slate-700 t-inline t-h-full t-align-middle dark:t-text-white"
             >
               Announcements
             </h3>
@@ -187,20 +187,21 @@ function selectTerm(key: number | string) {}
               />
             </template>
             <template v-else>
-              <div
-                class="t-text-gray-500 t-mb-3 t-py-4 t-flex t-flex-col t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+              <NCard
+                content-style="align-items: center; display:flex; flex-direction: column"
+                class="t-text-gray-500 t-mb-3 t-py-4 t-flex t-flex-col t-items-center t-justify-center t-border-[2px] t-rounded-md p-6"
                 vertical
                 align="center"
               >
                 <NIcon
-                  class="t-rotate-[-45deg] t-pb-0"
+                  class="t-rotate-[-30deg] t-pb-0"
                   size="22"
                   :component="Speaker024Filled"
                 />
                 <NText class="t-text-gray-500 t-font-medium"
                   >No Announcements Yet!</NText
                 >
-              </div>
+              </NCard>
             </template>
           </div>
         </section>
@@ -211,7 +212,7 @@ function selectTerm(key: number | string) {}
               ><Icon size="20px" color="#850E35"><Timer24Filled /> </Icon
             ></span>
             <h3
-              class="t-font-bold t-text-slate-700 t-inline t-h-full t-align-middle"
+              class="t-font-bold t-text-slate-700 t-inline t-h-full t-align-middle dark:t-text-white"
             >
               Deadlines
             </h3>
@@ -236,18 +237,19 @@ function selectTerm(key: number | string) {}
               />
             </template>
             <template v-else>
-              <div
-                class="t-text-gray-500 t-mb-3 t-py-4 t-flex t-flex-col t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+              <NCard
+                content-style="align-items: center; display:flex; flex-direction: column"
+                class="t-text-gray-500 t-mb-3 t-py-4 t-flex t-flex-col t-items-center t-justify-center t-border-[2px] t-rounded-md p-6"
               >
                 <NIcon
-                  class="t-rotate-[-45deg] t-pb-0"
+                  class="t-rotate-[-25deg] t-pb-0"
                   size="22"
                   :component="Timer24Filled"
                 />
                 <NText class="t-text-gray-500 t-font-medium"
                   >No Deadlines Ahead!</NText
                 >
-              </div>
+              </NCard>
             </template>
           </div>
         </section>

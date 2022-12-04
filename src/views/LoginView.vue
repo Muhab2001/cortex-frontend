@@ -92,8 +92,14 @@ const submitForm = () => {
     class="t-w-full t-flex t-flex-col t-items-center t-justify-center t-mb-10 t-h-full t-min-h-[90vh]"
   >
     <header class="t-flex-col t-items-center t-text-center">
-      <h1 class="t-font-sans t-font-bold t-m-auto t-text-[4rem]">Cortex</h1>
-      <p class="t-mb-10">New Era of premium learning experience</p>
+      <h1
+        class="t-font-sans t-font-bold t-m-auto t-text-[4rem] dark:t-text-white"
+      >
+        Cortex
+      </h1>
+      <p class="t-mb-10 dark:t-text-white">
+        New Era of premium learning experience
+      </p>
     </header>
     <NForm
       class="t-w-[90vw] md:t-w-72 lg:t-w-80"

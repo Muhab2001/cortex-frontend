@@ -4,7 +4,7 @@
     class="t-mr-1 t-mb-1 t-inline-flex t-items-center"
     :closable="props.editable"
   >
-    <a :href="props.fileUrl" download
+    <a :href="AxiosInstance.defaults.baseURL + props.fileUrl" download
       ><span> <fileIcon></fileIcon> </span>
       {{ props.fileUrl.replace(/.*\//g, "") }}</a
     >
@@ -16,7 +16,7 @@ import { FileImage, File } from "@vicons/fa";
 import { Folder24Filled, Tabs24Filled } from "@vicons/fluent";
 import { NIcon, NTag } from "naive-ui";
 import { type Component, h, computed } from "vue";
-
+import { AxiosInstance } from "@/axios";
 interface AttachementProps {
   filetype: FileType;
   editable: boolean;
@@ -51,7 +51,7 @@ const createIcon = (icon: FileType) => {
     case FileType.FOLDER:
       return renderIcon(Folder24Filled, { color: props.active ? "" : "grey" });
     default:
-      throw new Error("File type unidentified");
+      return renderIcon(File, { color: props.active ? "#3E6D9C" : "grey" });
   }
 };
 

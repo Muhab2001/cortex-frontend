@@ -19,7 +19,7 @@ interface baseItemProps {
   id: number;
   title: string;
   description?: string;
-  lastUpdated: string;
+  updatedAt: string;
   visible: boolean;
 }
 
@@ -30,7 +30,7 @@ export interface ContentItemProps extends baseItemProps {
 // the grade item is only shown for students
 export interface GradeItemProps
   extends Omit<baseItemProps, "description" | "visible"> {
-  score?: number;
+  score: number;
   maxPoints: number;
   comment?: string;
 }
@@ -46,7 +46,8 @@ export interface AssignmentItemProps extends baseItemProps {
   submissions?: number;
   submissionsLeft?: number;
   fileUrls: string[];
-  isSubmitted: boolean;
+  isSubmitted?: boolean;
+  isSubmittable: boolean;
   isUnlimited: boolean;
 }
 

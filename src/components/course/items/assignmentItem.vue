@@ -1,7 +1,7 @@
 <template>
   <NCard
     hoverable
-    class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer t-border-solid t-border-[2px] t-border-gray-200"
+    class="t-rounded-md t-w-full t-mb-2 t-break-inside-avoid t-cursor-pointer t-border-solid t-border-[2px]"
     content-style="display:flex; align-items: center; padding: 12px; flex-direction: column; padding-bottom: 1px"
     footer-style="padding-bottom: 6px"
   >
@@ -53,7 +53,7 @@
             </NTag>
           </span>
           <span
-            class="t-inline-flex t-flex-nowrap"
+            class="t-inline-flex t-flex-nowrap t-min-w-[120px]"
             v-if="props.editable"
             name="editing-bar"
           >
@@ -86,7 +86,6 @@
             </NButton>
             <VisibilityDropdown
               :visible="itemState.visible"
-              @group-toggle="toggleContentForAll"
               @single-toggle="toggleContentForSection"
             ></VisibilityDropdown>
           </span>
@@ -114,18 +113,24 @@
     <NDivider title-placement="left" class="t-py-2 t-my-1"
       ><NIcon
         size="22"
-        color="#2080f0"
+        :color="itemState.visible ? '#2080f0' : ''"
         :component="List28Filled"
         class="t-mr-2"
       />
-      <span class="t-text-gray-600 t-font-medium">Details</span></NDivider
+      <span class="t-text-gray-600 t-font-medium dark:t-text-white"
+        >Details</span
+      ></NDivider
     >
 
     <NSpace
       name="assignment-specs"
-      class="t-flex t-justify-start t-w-full t-px-3 t-pb-3"
+      class="t-flex t-justify-start t-w-full t-px-3 t-pb-3 t-flex-col sm:t-flex-row"
     >
-      <NTag round size="large" class="t-flex t-items-center t-py-3">
+      <NTag
+        round
+        size="large"
+        class="t-flex t-justify-center t-items-center t-py-3"
+      >
         <template #icon>
           <NIcon
             class="t-mx-1"
@@ -134,27 +139,18 @@
             size="25"
           />
         </template>
-        <span class="t-font-semibold t-text-md t-mr-2">Deadline</span
-        ><span>{{ new Date(itemState.deadline).toLocaleString() }}</span>
-      </NTag>
-      <NTag round size="large" class="t-flex t-items-center t-py-3">
-        <template #icon>
-          <NIcon
-            class="t-mx-1"
-            :component="CheckboxCheckedSync16Filled"
-            :color="itemState.visible ? '#009EFF' : 'grey'"
-            size="25"
-          />
-        </template>
-        <span class="t-font-semibold t-text-dm t-mr-3">Submissions</span
-        ><span
-          v-if="itemState.submissions"
-          class="t-text-blue-500 t-font-medium"
-          >{{ itemState.submissions }}</span
+        <div
+          class="t-flex t-flex-wrap t-w-full sm:t-w-fit t-text-xs sm:t-text-inherit"
         >
-        <span v-else class="t-text-blue-500 t-font-medium">No Limit</span>
+          <span class="t-font-semibold t-text-md t-mr-2">Deadline</span
+          ><span>{{ new Date(itemState.deadline).toLocaleString() }}</span>
+        </div>
       </NTag>
-      <NTag round size="large" class="t-flex t-items-center t-py-3">
+      <NTag
+        round
+        size="large"
+        class="t-flex t-justify-center t-items-center t-py-3"
+      >
         <template #icon>
           <NIcon
             class="t-mx-1"
@@ -163,16 +159,46 @@
             size="25"
           />
         </template>
-        <span class="t-font-semibold t-text-md t-mr-3">Max Points</span
+        <span
+          class="t-font-semibold md:t-text-md t-mr-3 t-text-xs sm:t-text-inherit"
+          >Max Points</span
         ><span class="t-font-semibold t-text-yellow-400">{{
-          itemState.maxPoints
+          itemState.maxScore
         }}</span>
       </NTag>
       <NTag
-        v-if="!props.isUnlimited"
         round
         size="large"
-        class="t-flex t-items-center t-py-3"
+        class="t-flex t-justify-center t-items-center t-py-3"
+      >
+        <template #icon>
+          <NIcon
+            class="t-mx-1"
+            :component="CheckboxCheckedSync16Filled"
+            :color="itemState.visible ? '#009EFF' : 'grey'"
+            size="25"
+          />
+        </template>
+        <span
+          class="t-font-semibold md:t-text-md t-mr-3 t-text-xs sm:t-text-inherit"
+          >Submissions</span
+        ><span
+          v-if="!itemState.isUnlimited"
+          class="t-text-blue-500 t-font-medium"
+          >{{ itemState.submissions }}</span
+        >
+        <span
+          v-else
+          class="t-text-blue-500 t-font-medium t-text-xs sm:t-text-inherit"
+          >No Limit</span
+        >
+      </NTag>
+
+      <NTag
+        v-if="!props.isUnlimited && auth.userProfile.role === Role.STUDENT"
+        round
+        size="large"
+        class="t-flex t-justify-center t-items-center t-py-3"
       >
         <template #icon>
           <NIcon
@@ -182,7 +208,9 @@
             size="25"
           />
         </template>
-        <span class="t-font-semibold t-text-dm t-mr-3">Submissions Left</span
+        <span
+          class="t-font-semibold md:t-text-md t-mr-3 t-text-xs sm:t-text-inherit"
+          >Submissions Left</span
         ><span class="t-text-green-500 t-font-medium">{{
           itemState.submissionsLeft
         }}</span>
@@ -191,7 +219,13 @@
     <template v-if="props.editable">
       <NDivider class="t-py-0 t-my-1"></NDivider>
       <NButton
-        @click="router.push(`/grade/${props.sectionId}/${props.id}`)"
+        secondary
+        strong
+        @click="
+          router.push(
+            `/grade/${courseInfo?.courseId}-${courseInfo?.sectionNo}/${props.sectionId}/${props.id}`
+          )
+        "
         icon-placement="left"
         type="warning"
         class="t-w-full t-my-2 t-flex t-items-center"
@@ -205,12 +239,12 @@
     <template v-else>
       <NDivider class="t-py-0 t-my-1"></NDivider>
       <NButton
+        secondary
+        strong
         @click="
-          $emit('submit', {
-            title: props.title,
-            description: props.description,
-            id: props.id,
-          })
+          () => {
+            $emit('submit', props.title, props.id, props.description);
+          }
         "
         :disabled="
           itemState.submissionsLeft === 0 ||
@@ -235,7 +269,7 @@
           :class="`t-font-medium ${
             itemState.visible ? 't-text-blue-400' : 't-text-gray-500'
           }`"
-          >{{ itemState.lastUpdated }}</span
+          >{{ new Date(itemState.updatedAt).toLocaleString() }}</span
         >
       </div>
     </template>
@@ -266,30 +300,38 @@ import {
   NTag,
   NSpace,
   NEllipsis,
+  useMessage,
 } from "naive-ui";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, inject } from "vue";
 import VisibilityDropdown from "../utils/VisibilityDropdown.vue";
 import { CheckmarkCircle } from "@vicons/ionicons5";
 import { useRouter } from "vue-router";
-
+import { AxiosInstance } from "@/axios";
+import { useAuth } from "@/stores/auth";
+import { Role } from "@/enums/roles";
+import { CourseMeta } from "@/injection_keys/courseView.keys";
 interface AssignmentItemProps {
   id: number;
   sectionId: number;
   title: string;
   description?: string;
-  lastUpdated: string;
+  updatedAt: string;
   editable: boolean;
   submissions?: number; // an instructor view does not contain the submission count
   submissionsLeft?: number;
-  isSubmitted: boolean;
+  isSubmitted?: boolean;
   isUnlimited: boolean;
   deadline: number;
   fileUrls: string[];
-  maxPoints: number;
+  maxScore: number;
   visible: boolean;
+  isSubmittable: boolean;
 }
 
 const props = defineProps<AssignmentItemProps>();
+console.log("DEADLINE", new Date(props.deadline).toLocaleString());
+const courseInfo = inject(CourseMeta);
+
 const emits = defineEmits<{
   (e: "delete", id: number): void;
   (
@@ -308,6 +350,8 @@ const itemFiles = ref<string[]>(props.fileUrls);
 
 const iconUtils = useIcon();
 const router = useRouter();
+const messenger = useMessage();
+const auth = useAuth();
 
 const itemState = reactive<AssignmentItemProps>({ ...props });
 
@@ -320,10 +364,6 @@ const headerIcon = computed(() =>
 
 // TODO: supply functions that trigger deletion or editing of content files
 
-function updateFiles() {
-  // TODO: open a popup to edit the files
-}
-
 function editItem() {
   emits("edit", {
     title: itemState.title,
@@ -334,19 +374,33 @@ function editItem() {
     deadline: itemState.deadline,
     isUnlimited: itemState.isUnlimited,
     isSubmitted: itemState.isSubmitted,
-    maxPoints: itemState.maxPoints,
+    maxScore: itemState.maxScore,
     sectionId: props.sectionId,
+    isSubmittable: props.isSubmittable,
+    updatedAt: props.updatedAt,
   });
 }
 
-function toggleContentForSection() {
-  itemState.visible = !itemState.visible;
+async function toggleContentForSection() {
+  console.log(+!itemState.visible);
+
+  try {
+    await AxiosInstance.put("/assignments/" + props.id, {
+      visible: +!itemState.visible,
+    });
+    messenger.success(
+      `Assignment ${itemState.visible ? "hidden" : "revealed"} successfully`
+    );
+    itemState.visible = !itemState.visible;
+  } catch (e) {
+    messenger.error("Assignment visibility change failed");
+  }
 }
 
-function toggleContentForAll() {
-  itemState.visible = !itemState.visible;
-  // TODO: api call to toggle all other items in the same group
-}
+// function toggleContentForAll() {
+//   itemState.visible = !itemState.visible;
+//   // TODO: api call to toggle all other items in the same group
+// }
 
 function deleteFile(fileURL: string) {
   // fire a confirmation modal, and delete on confirmation
@@ -356,7 +410,10 @@ function deleteFile(fileURL: string) {
     positiveText: "Confirm",
     negativeText: "Cancel",
     maskClosable: true,
-    onPositiveClick: () => {
+    onPositiveClick: async () => {
+      await AxiosInstance.put("/assignments/files/" + props.id, {
+        target: fileURL.replace(/.*\//g, ""),
+      });
       itemFiles.value = itemFiles.value.filter((url) => url !== fileURL);
     },
     onMaskClick: () => {},

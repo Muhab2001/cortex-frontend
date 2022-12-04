@@ -10,7 +10,7 @@
     transform-origin="center"
     content-style="padding-bottom: 0px"
     preset="card"
-    class="t-w-[80%]"
+    class="t-w-full md:t-w-[80%] t-max-w-7xl"
     @close="() => $emit('closed')"
     size="large"
   >
@@ -31,15 +31,15 @@
       <div class="t-w-fit t-py-0 title-container">
         <div class="t-flex t-items-center">
           <span class="t-font-bold t-mr-2 t-text-xl t-text-blue-500">{{
-            courseMeta?.courseId
+            courseInfo?.courseId
           }}</span>
           <span
             class="t-text-sm t-font-medium t-bg-blue-200 t-py-[0.1rem] t-px-2 t-rounded-md t-text-blue-600"
-            >Term {{ courseMeta?.term }}</span
+            >Term {{ courseInfo?.term }}</span
           >
         </div>
         <NEllipsis class="t-text-lg" :line-clamp="1">{{
-          courseMeta?.courseName
+          courseInfo?.courseName
         }}</NEllipsis>
       </div>
     </div>
@@ -52,9 +52,13 @@
       }}
     </div>
     <NForm class="t-mt-5" :model="modelRef" :rules="rules" ref="formRef">
-      <h2 class="t-font-semibold t-mb-0">Assignment Details</h2>
+      <h2 class="t-font-semibold t-mb-0 t-text-blue-400">Assignment Details</h2>
       <p class="t-mb-4">Describe the assignment specifics for students</p>
-      <NFormItem label="Title" path="title">
+      <NFormItem
+        feedback="Provide a title that is unique among other assignments for the section"
+        label="Title"
+        path="title"
+      >
         <NInput
           maxlength="30"
           type="text"
@@ -73,27 +77,56 @@
       </NFormItem>
       <!-- TODO: create a sectionGroup id for grouped editing -->
 
-      <h2 class="t-font-semibold t-mb-0">Assignment Availability</h2>
+      <h2 class="t-font-semibold t-mb-0 t-text-blue-400">
+        Assignment Availability
+      </h2>
       <p class="t-mb-2">
         Choose targeted sections, and the visibilty of created item, and the
         deadline
       </p>
       <NFormItem
+        v-if="props.mode === 'create'"
         class="t-mt-4"
         :label-style="{
           fontWeight: 'bold',
         }"
         label="Sections"
         path="sections"
+        feedback="Select all sections targeted by the assignment (must select 1 at least)"
       >
         <NCheckboxGroup v-model:value="modelRef.sections">
           <NCheckbox
-            v-for="section in allSections"
+            v-for="section in courseSections"
             :key="section"
             :label="section.toString()"
             :value="section"
           ></NCheckbox>
         </NCheckboxGroup>
+      </NFormItem>
+      <NFormItem
+        v-if="props.mode === 'create'"
+        class="t-mt-5"
+        label="Submisstion Block"
+        path="isSubmittable"
+        feedback="Disable for physical assginments and assessments and submit grades directly"
+      >
+        <NSwitch
+          class="t-py-2 t-h-10"
+          :round="false"
+          v-model:value="modelRef.isSubmittable"
+          :rail-style="railStyle"
+        >
+          <template #checked
+            ><div>
+              <span>Submittable</span>
+            </div></template
+          >
+          <template #unchecked
+            ><div>
+              <span>Blocked</span>
+            </div></template
+          >
+        </NSwitch>
       </NFormItem>
       <NFormItem
         class="t-mt-4"
@@ -128,7 +161,12 @@
           >
         </NSwitch>
       </NFormItem>
-      <NFormItem class="t-mt-6" label="Deadline" path="deadline">
+      <NFormItem
+        feedback="The last date for assignment submission"
+        class="t-mt-6"
+        label="Deadline"
+        path="deadline"
+      >
         <NDatePicker
           clearable
           v-model:value="modelRef.deadline"
@@ -136,11 +174,14 @@
           :is-date-disabled="disablePrevDates"
         />
       </NFormItem>
-      <h2 class="t-font-semibold t-mb-0 t-mt-3">Submission policy</h2>
+      <h2 class="t-font-semibold t-mb-0 t-mt-3 t-text-blue-400">
+        Submission policy
+      </h2>
       <p class="t-mb-0">Restrictions on student submissions</p>
+
       <NFormItem
         class="t-mt-5"
-        label="Submisstion Constraint"
+        label="Submisstion Count Limit"
         path="isUnlimited"
         feedback="Specify whether to limit student submissions or not"
       >
@@ -171,8 +212,9 @@
       <NCollapseTransition :show="!modelRef.isUnlimited">
         <NFormItem
           class="t-pt-3"
-          label-placement="left"
           feedback="Specify the submission limit (1 or more)"
+          label="Submission Limit"
+          path="submissions"
         >
           <NInputNumber
             :default-value="1"
@@ -183,18 +225,35 @@
           allowed submissions"
         /></NFormItem>
       </NCollapseTransition>
-      <h2 class="t-font-semibold t-mb-0 t-mt-3">Attachements</h2>
+      <NFormItem
+        class="t-pt-5"
+        path="maxScore"
+        label="Max Score"
+        feedback="Maximum possible score for the assignment"
+      >
+        <NInputNumber
+          :default-value="1"
+          :precision="2"
+          min="1"
+          v-model:value="modelRef.maxScore"
+          placeholder="Enter the maximum possible score of the assignment"
+      /></NFormItem>
+      <h2 class="t-font-semibold t-mb-0 t-mt-3 t-text-blue-400">
+        Attachements
+      </h2>
       <p class="t-mb-0">Supply all needed files to solve the assignment</p>
 
       <NFormItem class="t-my-0 t-py-0" path="attachements">
         <!-- TODO: add the default file list on editing -->
         <NUpload
+          show-download-button
+          name="files"
           class="t-mt-0 t-py-0"
           multiple
           ref="uploadRef"
           :default-upload="false"
-          action="https://www.mocky.io/v2/5e4bafc63100007100d8b70f"
-          :custom-request="requestHandler"
+          :default-file-list="props.targetItem?.fileUrls.map((url: string) => ({id: url, name: url.replace(/.*\//g, ''), url: AxiosInstance.defaults.baseURL + url} as UploadFileInfo ))"
+          :custom-request="customRequest"
           ><NButton>Upload files</NButton></NUpload
         >
       </NFormItem>
@@ -232,12 +291,12 @@ import {
   NCheckboxGroup,
   NEllipsis,
   NDatePicker,
-  NRadioGroup,
-  NSpace,
+  useLoadingBar,
   NInputNumber,
   type FormValidationError,
   useMessage,
   NCollapseTransition,
+  type UploadFileInfo,
 } from "naive-ui";
 import {
   inject,
@@ -245,9 +304,12 @@ import {
   type CSSProperties,
   watch,
   computed,
+  reactive,
+  type ComputedRef,
   type Ref,
 } from "vue";
 import { DiceThree, Infinity } from "@vicons/fa";
+import { AxiosInstance } from "@/axios";
 
 interface AssignmentItem {
   id: number;
@@ -258,6 +320,8 @@ interface AssignmentItem {
   visible: boolean;
   fileUrls: string[];
   isUnlimited: boolean;
+  isSubmittable: boolean;
+  maxScore: number;
 }
 
 interface AssignmentModalProps {
@@ -267,37 +331,56 @@ interface AssignmentModalProps {
 }
 
 interface AssignmentModel {
-  title?: string;
+  title: string;
   description?: string;
-  sections?: number[];
-  deadline?: number;
+  sections: number[];
+  deadline: number;
   submissions?: number;
-  isUnlimited?: boolean;
-  visible?: boolean;
+  isUnlimited: boolean;
+  visible: boolean;
+  maxScore: number;
+  isSubmittable: boolean;
 }
 
 const props = defineProps<AssignmentModalProps>();
 const emits = defineEmits<{
-  (e: "closed"): void;
+  (
+    e: "closed",
+    itemProps?: {
+      id: number;
+      title: string;
+      description?: string;
+      deadline: number;
+      visible: boolean;
+      isUnlimited: boolean;
+      maxScore: number;
+    }
+  ): void;
 }>();
 
 const messenger = useMessage();
-const courseMeta = inject(CourseMeta);
+const loading = useLoadingBar();
+const courseInfo = inject(CourseMeta);
 // TODO: replace with an api call
-const allSections = [1, 2, 3];
+const courseSections = ref<number[]>([]);
 // form state
+const currentUploadId = ref<number>(0);
 const formRef = ref<FormInst | null>(null);
 const uploadRef = ref<UploadInst | null>(null);
-const modelRef = ref<AssignmentModel>({
+const modelRef = reactive<AssignmentModel>({
   title: "",
   sections: [],
+  description: "",
   visible: false,
   isUnlimited: true,
-  submissions: 0,
+  deadline: Date.now() + 60 * 60 * 60 * 24,
+  maxScore: 1,
+  isSubmittable: true,
+  submissions: 1,
 });
-console.log(modelRef.value.deadline);
+console.log(modelRef.deadline);
 
-const rules: Ref<FormRules> = computed(() => ({
+const rules: ComputedRef<FormRules> = computed(() => ({
   title: {
     required: true,
     type: "string",
@@ -311,7 +394,7 @@ const rules: Ref<FormRules> = computed(() => ({
     trigger: "blur",
   },
   sections: {
-    required: true,
+    required: props.mode !== "edit",
     type: "array",
     validator(itemRule: FormItemRule, value: number[]) {
       console.log(value);
@@ -329,12 +412,17 @@ const rules: Ref<FormRules> = computed(() => ({
     type: "boolean",
     trigger: "blur",
   },
+  isSubmittable: {
+    required: true,
+    type: "boolean",
+    trigger: "blur",
+  },
   isUnlimited: {
     required: true,
     type: "boolean",
   },
   submissions: {
-    required: modelRef.value.isUnlimited,
+    required: modelRef.isUnlimited,
     min: 1,
     type: "number",
     trigger: "blur",
@@ -343,8 +431,16 @@ const rules: Ref<FormRules> = computed(() => ({
   },
   deadline: {
     required: true,
-    type: "string",
+    type: "number",
     trigger: "blur",
+  },
+  maxScore: {
+    required: true,
+    min: 1,
+    type: "number",
+    trigger: "blur",
+    message:
+      "You need to specify a nonzero positive maxscore for the assignment",
   },
 }));
 
@@ -353,37 +449,51 @@ const rules: Ref<FormRules> = computed(() => ({
 // handling pre-filling the modal content on editing mode
 watch(
   () => props.visible,
-  () => {
+  async () => {
     if (props.visible) {
+      courseSections.value = (
+        await AxiosInstance.get(
+          `/course/instructor/${courseInfo?.value.courseId}/${courseInfo?.value.term}`
+        )
+      ).data;
       if (props.mode === "edit") {
-        modelRef.value = {
-          title: props.targetItem?.title,
-          description: props.targetItem?.description,
-          // replace with a fetch request to the api for all sections under the course in current term
-          sections: [1, 2],
-          visible: props.targetItem!.visible,
-          deadline: props.targetItem!.deadline,
-          isUnlimited: props.targetItem!.isUnlimited,
-          submissions: props.targetItem!.submissions,
-        };
+        modelRef.title = props.targetItem!.title;
+        modelRef.description = props.targetItem!.description;
+        // replace with a fetch request to the api for all sections under the course in current term
+
+        modelRef.visible = props.targetItem!.visible;
+        modelRef.deadline = props.targetItem!.deadline;
+        modelRef.isUnlimited = props.targetItem!.isUnlimited;
+        modelRef.maxScore = props.targetItem!.maxScore;
+        modelRef.isSubmittable = props.targetItem!.isSubmittable;
+        modelRef.submissions = props.targetItem!.submissions;
       } else if (props.mode === "create") {
-        modelRef.value = {
-          title: "",
-          description: "",
-          // replace with a fetch request to the api for all sections under the course in current term
-          sections: [1, 2],
-          visible: false,
-          isUnlimited: false,
-          submissions: 1,
-        };
+        modelRef.title = "";
+        modelRef.description = "";
+        // replace with a fetch request to the api for all sections under the course in current term
+        modelRef.sections = [];
+        modelRef.visible = false;
+        modelRef.isUnlimited = false;
+        modelRef.isSubmittable = true;
+        modelRef.submissions = 1;
       }
     }
   }
 );
 
+const handleDownload = async (file: UploadFileInfo) => {
+  await AxiosInstance.get(file.url!, { responseType: "blob" });
+};
+
+const removeItem = async (file: UploadFileInfo) => {
+  if (props.targetItem && props.targetItem.fileUrls.includes(file.url!))
+    await AxiosInstance.delete("assignments/files/" + props.targetItem.id, {});
+};
+
 // datePicker setup
 
-const disablePrevDates = (ts: number) => ts <= Date.now();
+const disablePrevDates = (ts: number) =>
+  ts <= Math.min(Date.now(), props.targetItem?.deadline ?? Date.now());
 
 // styling section
 const railStyle = ({
@@ -398,26 +508,98 @@ const railStyle = ({
 
   return style;
 };
+
+watch(currentUploadId, async () => {
+  try {
+    if (currentUploadId.value !== 0) uploadRef.value?.submit();
+  } catch (e) {
+    // if upload fails, delete the new assignment to maintain consistency
+    await AxiosInstance.delete("/assignments/" + currentUploadId.value);
+  }
+});
 // form submission handling
 // TODO: API communications
 function submitForm() {
+  console.log(modelRef);
+
   formRef.value?.validate(
     async (errors: Array<FormValidationError> | undefined) => {
       if (!errors) {
-        try {
-          messenger.success("Successful Assignment Creation!");
-        } catch (e: any) {
-          messenger.error("Assignment creation Failed!");
+        if (props.mode === "create") {
+          try {
+            loading.start();
+            messenger.loading("Processing Assignment Creation", {
+              duration: 500,
+            });
+            for (const section of modelRef.sections) {
+              const newId = (
+                await AxiosInstance.post("assignments/", {
+                  sectionId: section,
+                  title: modelRef.title,
+                  description: modelRef.description,
+                  isSubmittable: +modelRef.isSubmittable,
+                  visible: +modelRef.visible,
+                  deadline: new Date(modelRef.deadline).toISOString(),
+                  maxPoints: modelRef.maxScore,
+                  maxSubmissionCount: modelRef.submissions,
+                })
+              ).data;
+              // updating the path to submit the files
+              currentUploadId.value = newId;
+            }
+            messenger.success("Successful Assignment Creation!");
+
+            loading.finish();
+
+            emits("closed");
+          } catch (e: any) {
+            loading.error();
+            messenger.error("Assignment creation Failed!");
+          }
+        } else if (props.mode === "edit") {
+          try {
+            loading.start();
+            messenger.loading("Processing Assignment Update", {
+              duration: 500,
+            });
+            const newId = (
+              await AxiosInstance.put("assignments/" + props.targetItem!.id, {
+                title: modelRef.title,
+                description: modelRef.description,
+                isSubmittable: +modelRef.isSubmittable,
+                visible: +modelRef.visible,
+                deadline: new Date(modelRef.deadline).toISOString(),
+                maxPoints: modelRef.maxScore,
+                maxSubmissionCount: modelRef.submissions,
+              })
+            ).data;
+            // updating the path to submit the files
+            currentUploadId.value = newId;
+            messenger.success("Successful Assignment Update!");
+
+            loading.finish();
+            console.log("ID", props.targetItem!.id);
+
+            emits("closed", {
+              title: modelRef.title,
+              description: modelRef.description,
+              deadline: modelRef.deadline,
+              visible: modelRef.visible,
+              isUnlimited: modelRef.isUnlimited,
+              maxScore: modelRef.maxScore,
+              id: props.targetItem!.id,
+            });
+          } catch (e) {
+            loading.error();
+            messenger.error("Assignment Update Failed!");
+          }
         }
-      } else {
-        console.log(errors);
-        messenger.error("Login Failed!");
       }
     }
   );
 }
 
-function requestHandler({
+const customRequest = async ({
   file,
   data,
   headers,
@@ -426,8 +608,17 @@ function requestHandler({
   onFinish,
   onError,
   onProgress,
-}: UploadCustomRequestOptions) {
-  return null;
-}
+}: UploadCustomRequestOptions) => {
+  const formData = new FormData();
+  try {
+    if (file) formData.append("files", file.file as File);
+    await AxiosInstance.patch(
+      `assignments/upload/` + currentUploadId.value,
+      formData
+    );
+  } catch (e) {
+    messenger.error("File Upload Failed");
+  }
+};
 </script>
 <style></style>

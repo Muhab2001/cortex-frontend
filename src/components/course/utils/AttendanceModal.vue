@@ -10,7 +10,7 @@
     transform-origin="center"
     content-style="padding-bottom: 0px"
     preset="card"
-    class="t-w-[80%]"
+    class="t-w-full md:t-w-[80%] t-max-w-7xl"
     @close="() => $emit('closed')"
     size="large"
   >
@@ -52,16 +52,26 @@
         name="dots-holder"
         class="t-w-full t-flex t-justify-center t-flex-wrap"
       >
-        <span
+        <NTooltip
           v-for="(record, index) in attendanceState.records"
           :key="index"
-          :class="recordsStyle[index]"
-          @click="
-            () => {
-              navigate(undefined, index);
-            }
-          "
-        ></span>
+          triggeer="hover"
+        >
+          <template #trigger>
+            <span
+              :class="recordsStyle[index]"
+              @click="
+                () => {
+                  navigate(undefined, index);
+                }
+              "
+            ></span>
+          </template>
+          <div class="t-flex t-flex-col t-items-center">
+            <div>{{ record.name }}</div>
+            <div class="t-text-blue-400">{{ record.username }}</div>
+          </div>
+        </NTooltip>
       </div>
 
       <div class="t-my-3 t-flex t-w-full t-flex-col t-items-center">
@@ -71,7 +81,7 @@
         </div>
         <!-- current student usernam (KFUPMID) -->
         <div class="t-text-blue-400 t-text-lg">
-          {{ attendanceState.records[currentIndex].id }}
+          {{ attendanceState.records[currentIndex].username }}
         </div>
         <NSpace class="t-my-10" align="center" justify="center"
           ><NButton
@@ -81,7 +91,7 @@
             type="error"
             @click="
               () => {
-                navigate(AttendanceIndex.ABSENT);
+                navigate(AttendanceStatus.ABSENT);
               }
             "
           >
@@ -97,7 +107,7 @@
             type="warning"
             @click="
               () => {
-                navigate(AttendanceIndex.LATE);
+                navigate(AttendanceStatus.LATE);
               }
             "
             ><template #icon
@@ -111,7 +121,7 @@
             type="success"
             @click="
               () => {
-                navigate(AttendanceIndex.PRESENT);
+                navigate(AttendanceStatus.PRESENT);
               }
             "
             ><template #icon
@@ -125,7 +135,7 @@
     </section>
     <section v-else>
       <div
-        class="t-p-6 t-py-10 t-text-gray-400 t-flex t-flex-col t-items-center t-w-[78px]"
+        class="t-p-6 t-py-10 t-text-gray-400 t-flex t-flex-col t-items-center t-w-full"
       >
         <NIcon size="30" :component="EmojiSad16Filled"></NIcon>
         <div>No Enrolled Students Yet! Hang in there</div>
@@ -142,6 +152,7 @@
   </NModal>
 </template>
 <script setup lang="ts">
+import { AxiosInstance } from "@/axios";
 import { CourseMeta } from "@/injection_keys/courseView.keys";
 import {
   EmojiSad16Filled,
@@ -152,8 +163,16 @@ import {
   PersonDelete24Filled,
 } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
-import { NModal, NIcon, NSpace, NButton, NDivider } from "naive-ui";
-import { inject, reactive, onBeforeMount, ref, computed } from "vue";
+import {
+  NModal,
+  NIcon,
+  NSpace,
+  NButton,
+  NDivider,
+  NTooltip,
+  useDialog,
+} from "naive-ui";
+import { inject, reactive, watch, ref, computed } from "vue";
 
 interface AttendanceModalProps {
   sectionId: number;
@@ -162,11 +181,12 @@ interface AttendanceModalProps {
 
 interface StudentRecord {
   name: string;
-  id: string;
-  status: AttendanceIndex;
+  username: string;
+  status: AttendanceStatus;
+  id: number;
 }
 
-enum AttendanceIndex {
+enum AttendanceStatus {
   UNSET = -1,
   ABSENT = 0,
   LATE = 1,
@@ -176,7 +196,7 @@ enum AttendanceIndex {
 const props = defineProps<AttendanceModalProps>();
 const emits = defineEmits<{ (e: "closed"): void }>();
 
-const navigate = (newStatus?: AttendanceIndex, newIndex?: number) => {
+const navigate = (newStatus?: AttendanceStatus, newIndex?: number) => {
   console.log(
     "value",
     currentIndex.value,
@@ -186,8 +206,15 @@ const navigate = (newStatus?: AttendanceIndex, newIndex?: number) => {
     newIndex
   );
 
-  if (newStatus !== undefined)
+  if (newStatus !== undefined) {
+    if (
+      (attendanceState.records[currentIndex.value].status =
+        AttendanceStatus.UNSET)
+    ) {
+      recordedCount.value++;
+    }
     attendanceState.records[currentIndex.value].status = newStatus;
+  }
   if (newIndex !== undefined) currentIndex.value = newIndex;
   else {
     if (currentIndex.value !== attendanceState.records.length - 1) {
@@ -197,48 +224,84 @@ const navigate = (newStatus?: AttendanceIndex, newIndex?: number) => {
 };
 
 const courseMeta = inject(CourseMeta);
+const dialog = useDialog();
 
 // use an API to populate the students of the section
 const currentIndex = ref<number>(0);
+const recordedCount = ref<number>(0);
 const attendanceState = reactive<{
   records: StudentRecord[];
 }>({
-  records: [
-    {
-      id: "201945570",
-      name: "first student",
-      status: AttendanceIndex.UNSET,
-    },
-    {
-      id: "201945571",
-      name: "second student",
-      status: AttendanceIndex.UNSET,
-    },
-    {
-      id: "201945573",
-      name: "last student",
-      status: AttendanceIndex.UNSET,
-    },
-  ],
+  records: [],
 });
 
-onBeforeMount(() => {});
+watch(
+  () => props.visible,
+  async () => {
+    attendanceState.records = (
+      await AxiosInstance.get("attendance/" + props.sectionId)
+    ).data.map((student: any) => ({
+      id: student.id,
+      name: student.firstName + " " + student.lastName,
+      status: AttendanceStatus.UNSET,
+      username: student.username,
+    }));
+  }
+);
 
 const recordsStyle = computed(() => {
   if (attendanceState.records.length !== 0) {
     return attendanceState.records.map((record) => ({
       base_label: true,
-      present: record.status === AttendanceIndex.PRESENT,
-      absent: record.status === AttendanceIndex.ABSENT,
-      late: record.status === AttendanceIndex.LATE,
-      unset: record.status === AttendanceIndex.UNSET,
+      present: record.status === AttendanceStatus.PRESENT,
+      absent: record.status === AttendanceStatus.ABSENT,
+      late: record.status === AttendanceStatus.LATE,
+      unset: record.status === AttendanceStatus.UNSET,
     }));
   } else {
     return [];
   }
 });
 
-const submitAttendance = () => {
+const submitAttendance = async () => {
+  if (recordedCount.value !== attendanceState.records.length) {
+    dialog.warning({
+      title: "Unmarked students",
+      content:
+        "Submitting attendance will flag all unmarked students as absent. Are you sure?",
+      positiveText: "Confirm",
+      negativeText: "Cancel",
+      maskClosable: true,
+      onPositiveClick: async () => {
+        attendanceState.records = attendanceState.records.map((record) =>
+          record.status !== AttendanceStatus.UNSET
+            ? record
+            : {
+                ...record,
+                status: AttendanceStatus.ABSENT,
+              }
+        );
+        await AxiosInstance.patch("attendance/" + props.sectionId, {
+          records: attendanceState.records.map((record) => ({
+            id: record.id,
+            index: record.status,
+          })),
+        });
+
+        emits("closed");
+      },
+      onMaskClick: () => {},
+      onEsc: () => {},
+    });
+  } else {
+    await AxiosInstance.patch("attendance/" + props.sectionId, {
+      records: attendanceState.records.map((record) => ({
+        id: record.id,
+        index: record.status,
+      })),
+    });
+    emits("closed");
+  }
   // API call tu submit the attendance record
   console.log(attendanceState.records);
 };

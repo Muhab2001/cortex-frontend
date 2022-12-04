@@ -26,7 +26,9 @@
           :component="CommentMultiple24Filled"
           class="t-mr-2"
         />
-        <span class="t-text-gray-600 t-font-medium">Comment</span></NDivider
+        <span class="t-text-gray-600 t-font-medium dark:t-text-white"
+          >Comment</span
+        ></NDivider
       >
       <p
         icon-placement="left"
@@ -44,7 +46,7 @@
           :component="FileCopyRound"
           class="t-mr-2"
         />
-        <span class="t-text-gray-600 t-font-medium"
+        <span class="t-text-gray-600 dark:t-text-white t-font-medium"
           >Attachements</span
         ></NDivider
       >
@@ -62,7 +64,7 @@
           :filetype="fileURL.split('.').slice(-1)[0] as FileType"
         />
       </div>
-      <NText class="t-px-2" v-else>No Files Attached</NText>
+      <NText class="t-px-4" v-else>No Files Attached</NText>
     </section>
     <template #footer
       ><div class="t-flex t-flex-wrap">

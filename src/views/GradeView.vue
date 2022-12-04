@@ -8,34 +8,40 @@ import {
   type NButtonGroup,
   NSpace,
   NDataTable,
-  NIcon,
+  NText,
   useMessage,
 } from "naive-ui";
-import { reactive, h } from "vue";
+import { reactive, h, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import { useIcon } from "@/composables/useIcon";
-import { Delete28Filled, ErrorCircle24Filled } from "@vicons/fluent";
+import {
+  Delete28Filled,
+  ErrorCircle24Filled,
+  Star20Filled,
+} from "@vicons/fluent";
 import { CheckmarkCircle, Save } from "@vicons/ionicons5";
 import { useBreadCrumb } from "@/stores/breadcrump";
 import GradeModal from "@/components/course/utils/GradeModal.vue";
+import { AxiosInstance } from "@/axios";
 interface GradePageProps {
   assignmentId: number;
   sectionId: number;
+  courseFlag: string;
 }
 
 interface GradeRecord {
+  id: number;
   score?: number;
   studentName: string;
-  studentId: string; //! This is not the student id stored in the db
+  studentId: number;
+  studentUsername: string; //! This is the KFUPM id for students
   isSubmitted: boolean;
 }
 
 interface GradeInput {
   title: string;
   description?: string;
-  courseName: string;
-  courseId: string;
-  sectionNo: number;
+  courseFlag: string;
   fullScore: number;
   records: GradeRecord[];
 }
@@ -47,160 +53,24 @@ const iconUtils = useIcon();
 // TODO: fetch all the grades for the assignment id requested
 
 const grade = reactive<GradeInput>({
-  title: "Project Phase #3",
-  description: " The last phase of the package delivery system",
-  courseId: "ICS321",
-  courseName: "Management of Database Systems",
-  sectionNo: 5,
-  fullScore: 20,
-  records: [
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195671",
-      studentName: "Mohammed abubaker",
-      isSubmitted: true,
-      score: 20,
-    },
-    {
-      studentId: "20145570",
-      studentName: "Muhab abubaker",
-      score: 13,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195371",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195540",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195573",
-      studentName: "Mohammed abubaker",
-      isSubmitted: true,
-      score: 15,
-    },
-    {
-      studentId: "20195574",
-      studentName: "Muhab abubaker",
-      score: 5,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195572",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
+  title: "dfdfdf",
+  description: "sdffsd",
+  courseFlag: props.courseFlag,
 
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-    {
-      studentId: "20195570",
-      studentName: "Muhab abubaker",
-      score: 10,
-      isSubmitted: true,
-    },
-    {
-      studentId: "20195571",
-      studentName: "Mohammed abubaker",
-      isSubmitted: false,
-    },
-  ],
+  fullScore: 20,
+  records: [],
+});
+
+onBeforeMount(async () => {
+  const { records, title, description, fullScore } = (
+    await AxiosInstance.get(
+      `grades/section/${props.sectionId}/${props.assignmentId}`
+    )
+  ).data;
+  grade.records = records;
+  grade.title = title;
+  grade.description = description;
+  grade.fullScore = fullScore;
 });
 
 const breadcrumbs = useBreadCrumb();
@@ -212,7 +82,7 @@ breadcrumbs.updateOptions([
     path: "/home",
   },
   {
-    label: `${grade.courseId}-${grade.sectionNo}`,
+    label: props.courseFlag,
     path: `/course/${props.sectionId}`,
   },
   {
@@ -221,10 +91,44 @@ breadcrumbs.updateOptions([
   },
 ]);
 
+// grading modal state
+const gradeModalState = reactive<{
+  visible: boolean;
+  record: GradeRecord;
+  gradeId: number;
+  studentId: number;
+  maxScore: number;
+  studentName: string;
+}>({
+  visible: false,
+  record: grade.records[0],
+  maxScore: grade.fullScore,
+  studentName: "",
+  studentId: 0,
+  gradeId: 0,
+});
+
 function openGradeModal(row: GradeRecord) {
   gradeModalState.visible = true;
   gradeModalState.record = row;
-  gradeModalState.name = row.studentName;
+  gradeModalState.studentName = row.studentName;
+  gradeModalState.studentId = row.studentId;
+  gradeModalState.gradeId = row.id;
+  gradeModalState.maxScore = grade.fullScore;
+}
+
+function closeGradeModal(newScore?: number, gradeId?: number) {
+  gradeModalState.visible = false;
+  if (newScore !== undefined && gradeId !== undefined) {
+    const newRecords = grade.records.map((record) => {
+      if (record.id === gradeId) {
+        return { ...record, score: newScore };
+      } else {
+        return record;
+      }
+    });
+    grade.records = newRecords;
+  }
 }
 
 const gradeType = (
@@ -249,7 +153,7 @@ function createColumns(): DataTableColumns<GradeRecord> {
       title: "ID",
       key: "studentId",
       resizable: false,
-      width: 40,
+      width: 80,
     },
     {
       title: "Name",
@@ -308,7 +212,7 @@ function createColumns(): DataTableColumns<GradeRecord> {
           },
           {
             default: () =>
-              !record.score
+              record.score === undefined
                 ? "-"
                 : h(
                     NTag,
@@ -346,35 +250,35 @@ function createColumns(): DataTableColumns<GradeRecord> {
           NButton,
           {
             size: "small",
-            type: "info",
+            type: "warning",
+            secondary: true,
+            strong: true,
+            class: "t-py-2",
             onClick: () => openGradeModal(record),
           },
           {
-            default: () => "Grade",
+            default: () => [
+              h(
+                NSpace,
+                { align: "center" },
+                {
+                  default: () => [
+                    h(
+                      iconUtils.renderIcon(Star20Filled, {
+                        size: "22",
+                        class: "t-inline-flex t-items-center t-h-20 t-mr-0",
+                      })
+                    ),
+                    "Grade",
+                  ],
+                }
+              ),
+            ],
           }
         );
       },
     },
   ];
-}
-
-// grading modal state
-const gradeModalState = reactive<{
-  visible: boolean;
-  record: GradeRecord;
-  maxScore: number;
-  name: string;
-}>({
-  visible: false,
-  record: grade.records[0],
-  maxScore: grade.fullScore,
-  name: "",
-});
-
-function saveGrades() {
-  // TODO submission logic from the API
-  // ! parametrize the routing
-  router.push("/course/" + grade.courseName);
 }
 
 // TODO emitting messages from children components to parent
@@ -383,17 +287,19 @@ function saveGrades() {
 <template>
   <main class="t-pb-40 md:t-pb-0">
     <GradeModal
-      :title="grade.title"
+      :grade-id="gradeModalState.gradeId"
       :assignment-id="props.assignmentId"
-      :student-id="gradeModalState.record.studentId"
-      :score="gradeModalState.record.score"
+      :student-id="gradeModalState.studentId"
+      :title="grade.title"
       :visible="gradeModalState.visible"
-      @closed="gradeModalState.visible = false"
+      @closed="closeGradeModal"
       :max-score="gradeModalState.maxScore"
-      :name="gradeModalState.name"
+      :name="gradeModalState.studentName"
     />
     <header class="t-mb-4">
-      <h2 id="assignment-title" class="t-font-semibold">{{ grade.title }}</h2>
+      <NText id="assignment-title" class="t-font-semibold">{{
+        grade.title
+      }}</NText>
       <p class="t-text-gray-400 t-font-medium" v-if="grade.description">
         {{ grade.description }}
       </p>
