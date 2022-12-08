@@ -30,25 +30,30 @@ import type { Role } from "@/enums/roles";
 import { useAuth } from "@/stores/auth";
 import type { SectionTab } from "typings/CourseViewTabs";
 import { watch, defineAsyncComponent } from "vue";
+import SkeletonTab from "@/components/utils/SkeletonTab.vue";
+
+const AnnouncementsTab = defineAsyncComponent({
+  loader: () => import("@/components/course/tabs/AnnouncementsTab.vue"),
+  loadingComponent: SkeletonTab,
+});
+const AssignmentsTab = defineAsyncComponent({
+  loader: () => import("@/components/course/tabs/AssignmentsTab.vue"),
+  loadingComponent: SkeletonTab,
+});
+const ContentTabVue = defineAsyncComponent({
+  loader: () => import("@/components/course/tabs/ContentTab.vue"),
+  loadingComponent: SkeletonTab,
+});
+const GradesTab = defineAsyncComponent({
+  loader: () => import("@/components/course/tabs/GradesTab.vue"),
+  loadingComponent: SkeletonTab,
+});
 
 interface SectionSlotProps {
   sectionId: number;
   role: Role;
   tab: SectionTab;
 }
-
-const AnnouncementsTab = defineAsyncComponent(
-  () => import("@/components/course/tabs/AnnouncementsTab.vue")
-);
-const AssignmentsTab = defineAsyncComponent(
-  () => import("@/components/course/tabs/AssignmentsTab.vue")
-);
-const ContentTabVue = defineAsyncComponent(
-  () => import("@/components/course/tabs/ContentTab.vue")
-);
-const GradesTab = defineAsyncComponent(
-  () => import("@/components/course/tabs/GradesTab.vue")
-);
 
 const props = defineProps<SectionSlotProps>();
 const auth = useAuth();

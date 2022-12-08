@@ -11,6 +11,7 @@
     "
   />
   <NCard
+    v-if="!loading"
     class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
@@ -69,6 +70,7 @@
       </div>
     </template>
   </NCard>
+  <SkeletonTab v-else :editable="props.role === Role.INSTRUCTOR" />
 </template>
 <script setup lang="ts">
 import { onBeforeMount, reactive, ref, watch } from "vue";
@@ -84,6 +86,7 @@ import {
 import { NButton, NCard, NDivider, NIcon, useDialog } from "naive-ui";
 import ContentModal from "../utils/ContentModal.vue";
 import { AxiosInstance } from "@/axios";
+import SkeletonTab from "@/components/utils/SkeletonTab.vue";
 
 interface SectionTabProps {
   sectionId: number;
@@ -120,9 +123,12 @@ watch(
 const props = defineProps<SectionTabProps>();
 // TODO initialize according to given params
 const items = ref<ContentItemProps[]>([]);
+const loading = ref(true);
 
 async function fetchItems() {
+  loading.value = true;
   items.value = (await AxiosInstance.get("content/" + props.sectionId)).data;
+  loading.value = false;
 }
 
 onBeforeMount(async () => {

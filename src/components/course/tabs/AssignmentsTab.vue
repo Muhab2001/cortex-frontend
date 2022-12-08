@@ -23,6 +23,7 @@ import AssignmentModal from "../utils/AssignmentModal.vue";
 import SubmissionModal from "../utils/SubmissionModal.vue";
 import { AxiosInstance } from "@/axios";
 import { id } from "date-fns/esm/locale";
+import SkeletonTab from "@/components/utils/SkeletonTab.vue";
 interface SectionTabProps {
   sectionId: number;
   role: Role;
@@ -68,12 +69,14 @@ const assignmentSheet = reactive<{ records: AssignmentItemProps[] }>({
   records: [],
 });
 
+const loading = ref(true);
+
 onBeforeMount(async () => {
+  loading.value = true;
   assignmentSheet.records = (
     await AxiosInstance.get(`assignments/${props.role}/${props.sectionId}`)
   ).data;
-
-  assignmentSheet.records.forEach((item) => console.log(item));
+  loading.value = false;
 });
 function deleteItem(itemID: number) {
   // display the confirmation dialog
@@ -164,6 +167,7 @@ function showSubmissionModal(
     @closed="submissionModalState.visible = false"
   />
   <NCard
+    v-if="!loading"
     class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
@@ -233,6 +237,7 @@ function showSubmissionModal(
       </div>
     </template>
   </NCard>
+  <SkeletonTab v-else :editable="props.role === Role.INSTRUCTOR" />
 </template>
 
 <style></style>

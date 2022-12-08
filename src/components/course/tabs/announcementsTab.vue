@@ -17,9 +17,10 @@ import {
   NIcon,
   useMessage,
 } from "naive-ui";
-import type { Role } from "@/enums/roles";
+import { Role } from "@/enums/roles";
 import AnnouncementModal from "../utils/AnnouncementModal.vue";
 import { AxiosInstance } from "@/axios";
+import SkeletonTab from "@/components/utils/SkeletonTab.vue";
 
 interface SectionTabProps {
   sectionId: number;
@@ -46,12 +47,17 @@ const modalState = reactive<{
   mode: "create",
 });
 
+const loading = ref(true);
+
 const items = ref<AnnouncementItemProps[]>([]);
 
 async function fetchItems() {
+  loading.value = true;
+
   items.value = (
     await AxiosInstance.get("/announcements/section/" + props.sectionId)
   ).data;
+  loading.value = false;
 }
 
 onBeforeMount(async () => {
@@ -101,6 +107,7 @@ function showModal() {
     :target-item="modalState.editedItem"
   />
   <NCard
+    v-if="!loading"
     class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0;"
@@ -164,6 +171,7 @@ function showModal() {
       </template>
     </div>
   </NCard>
+  <SkeletonTab v-else :editable="props.role === Role.INSTRUCTOR" />
 </template>
 
 <style lang=""></style>

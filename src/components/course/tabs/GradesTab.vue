@@ -1,5 +1,6 @@
 <template>
   <NCard
+    v-if="!loading"
     class="t-border-solid t-border-[2px]"
     content-style="padding: 16px 8px; padding-top:0"
     header-style="padding-bottom: 0"
@@ -31,6 +32,7 @@
       </template>
     </div>
   </NCard>
+  <SkeletonTabVue v-else :editable="false" />
 </template>
 <script setup lang="ts">
 import { ref, onBeforeMount } from "vue";
@@ -73,8 +75,9 @@ const items = ref<GradeItemProps[]>([
   //   maxPoints: 10,
   // },
 ]);
-
+const loading = ref(true);
 onBeforeMount(async () => {
+  loading.value = true;
   items.value = (
     await AxiosInstance.get("grades/student/" + props.sectionId)
   ).data.map((grade: any) => ({
@@ -85,6 +88,7 @@ onBeforeMount(async () => {
     maxPoints: grade.assignment.maxPoints,
     comment: grade.comment,
   }));
+  loading.value = false;
 });
 </script>
 <style></style>
