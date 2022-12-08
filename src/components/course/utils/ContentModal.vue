@@ -94,9 +94,9 @@
         <NCheckboxGroup v-model:value="modelRef.sections">
           <NCheckbox
             v-for="section in courseSections"
-            :key="section"
-            :label="section.toString()"
-            :value="section"
+            :key="section.id"
+            :label="section.section_number.toString()"
+            :value="section.id"
           ></NCheckbox>
         </NCheckboxGroup>
       </NFormItem>
@@ -230,7 +230,7 @@ const loading = useLoadingBar();
 const courseMeta = inject(CourseMeta);
 console.log(courseMeta);
 // TODO replace with an API call
-const courseSections = ref<number[]>([]);
+const courseSections = ref<{ id: number; section_number: number }[]>([]);
 
 // form state
 const currentUploadId = ref<number>(0);
@@ -285,7 +285,10 @@ watch(
         await AxiosInstance.get(
           `/course/instructor/${courseMeta?.value.courseId}/${courseMeta?.value.term}`
         )
-      ).data;
+      ).data.map((section: any) => ({
+        id: section.id,
+        section_number: section.section_number,
+      }));
       if (props.mode === "edit") {
         modelRef.value = {
           title: props.targetItem!.title,
@@ -348,8 +351,7 @@ function submitForm() {
 
             for (const section of modelRef.value.sections) {
               const newId = (
-                await AxiosInstance.post("content/", {
-                  sectionId: section,
+                await AxiosInstance.post("content/" + section, {
                   title: modelRef.value.title,
                   description: modelRef.value.description,
                   visible: +modelRef.value.visible,

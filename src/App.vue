@@ -49,7 +49,7 @@ document
     "t-transition",
     "t-duration-300",
     "t-ease-in-out",
-    "delay-100"
+    "t-scroll-smooth"
   );
 
 watchEffect(() => {
@@ -69,70 +69,66 @@ const route = useRoute();
     style="width: 100%; margin: 0; height: 100%; min-height: 100vh"
     abstract
   >
-    <div
-      class="t-px-3 t-py-2 md:t-px-4 md:t-py-8 t-min-h-[100vh] dark:t-bg-[#121212]"
-    >
-      <NMessageProvider style="width: 100vw; height: 100%">
-        <NLoadingBarProvider>
-          <NDialogProvider>
-            <header
-              v-if="route.name !== 'login'"
-              class="t-items-start t-flex t-flex-col"
+    <div class="t-w-full t-h-[100vh] dark:t-bg-[#121212] t-overflow-x-hidden">
+      <header
+        v-if="route.name !== 'login'"
+        class="t-items-start t-flex t-flex-col t-w-full"
+      >
+        <!-- header title -->
+        <div
+          class="t-w-full t-flex-row t-flex t-justify-between t-items-center t-shadow-md t-pt-2 md:t-pt-4 t-px-4"
+        >
+          <span class="t-inline-flex t-w-fit t-ml-1">
+            <!-- the cortex logo -->
+            <img
+              class="t-w-16 t-mr-4"
+              src="@/assets/logo_only_pure.svg"
+              alt=""
+            />
+            <h2
+              class="t-text-slate-700 t-font-bold t-hidden sm:t-inline-flex dark:t-text-white"
             >
-              <!-- header title -->
-              <div
-                class="t-w-full t-flex-row t-flex t-justify-between t-items-center"
-              >
-                <span class="t-inline-flex t-w-fit t-ml-1">
-                  <!-- the cortex logo -->
-                  <img
-                    class="t-w-16 t-mr-4"
-                    src="@/assets/logo_only_pure.svg"
-                    alt=""
-                  />
-                  <h2
-                    class="t-text-slate-700 t-font-bold t-hidden sm:t-inline-flex dark:t-text-white"
-                  >
-                    Cortex
-                  </h2>
-                </span>
-                <span class="t-inline-flex t-items-center">
-                  <NButton
-                    @click="themeConfig.switchTheme"
-                    circle
-                    type="default"
-                    secondary
-                    strong
-                  >
-                    <template #icon
-                      ><NIcon
-                        :color="
-                          themeConfig.theme.value == Theme.DARK
-                            ? '#F49D1A'
-                            : 'grey'
-                        "
-                        :component="
-                          themeConfig.theme.value == Theme.DARK
-                            ? WbSunnyFilled
-                            : Moon
-                        "
-                    /></template>
-                  </NButton>
-                  <ProfileCard
-                    :name="auth.userProfile.fullname"
-                    :username="auth.userProfile.username"
-                    :role="auth.userProfile.role"
-                    :photo-url="auth.userProfile.photoUrl"
-                  />
-                </span>
-              </div>
-              <!-- TODO: replace with a breadcrump -->
-              <BreadcrumbWrapper />
-            </header>
-            <RouterView />
-          </NDialogProvider>
-        </NLoadingBarProvider>
-      </NMessageProvider>
+              Cortex
+            </h2>
+          </span>
+          <span class="t-inline-flex t-items-center">
+            <NButton
+              @click="themeConfig.switchTheme"
+              circle
+              type="default"
+              secondary
+              strong
+            >
+              <template #icon
+                ><NIcon
+                  :color="
+                    themeConfig.theme.value == Theme.DARK ? '#F49D1A' : 'grey'
+                  "
+                  :component="
+                    themeConfig.theme.value == Theme.DARK ? WbSunnyFilled : Moon
+                  "
+              /></template>
+            </NButton>
+            <ProfileCard
+              :name="auth.userProfile.fullname"
+              :username="auth.userProfile.username"
+              :role="auth.userProfile.role"
+              :photo-url="auth.userProfile.photoUrl"
+            />
+          </span>
+        </div>
+        <!-- TODO: replace with a breadcrump -->
+        <BreadcrumbWrapper class="t-px-4 t-pt-4" />
+      </header>
+      <div class="t-px-3 t-py-2 md:t-px-4 md:t-py-8">
+        <NMessageProvider style="width: 100vw; height: 100%">
+          <NLoadingBarProvider>
+            <NDialogProvider>
+              <RouterView />
+            </NDialogProvider>
+          </NLoadingBarProvider>
+        </NMessageProvider>
+      </div>
     </div>
   </NConfigProvider>
 </template>

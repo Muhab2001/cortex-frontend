@@ -1,6 +1,6 @@
 <template>
   <NCard
-    class="t-rounded-md t-border-solid t-border-[2px] t-cursor-pointer"
+    class="t-rounded-lg t-mb-3 t-cursor-pointer t-border-solid t-border-[2px] t-min-w-[80vw] md:t-min-w-full t-snap-center t-ml-2"
     header-style="padding-bottom: 0;"
     content-style="padding-top: 0"
     hoverable

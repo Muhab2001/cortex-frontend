@@ -60,7 +60,7 @@
     </template>
     <template v-else>
       <div
-        class="t-text-gray-500 t-mb-3 t-py-10 t-flex t-flex-col t-columns-1 t-items-center t-justify-center t-border-solid t-border-[2px] t-border-gray-300 t-rounded-md p-6"
+        class="t-text-gray-500 t-mb-3 t-py-10 t-flex t-flex-col t-columns-1 t-items-center t-justify-center t-border-solid t-border-[2px] t-rounded-md p-6"
       >
         <NIcon class="t-pb-0" size="30" :component="EmojiSurprise20Filled" />
         <NText class="t-text-gray-500 t-font-medium"

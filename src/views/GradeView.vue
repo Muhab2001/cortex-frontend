@@ -63,9 +63,7 @@ const grade = reactive<GradeInput>({
 
 onBeforeMount(async () => {
   const { records, title, description, fullScore } = (
-    await AxiosInstance.get(
-      `grades/section/${props.sectionId}/${props.assignmentId}`
-    )
+    await AxiosInstance.get(`grades/section/${props.assignmentId}`)
   ).data;
   grade.records = records;
   grade.title = title;

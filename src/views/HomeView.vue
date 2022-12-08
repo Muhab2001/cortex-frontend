@@ -172,7 +172,9 @@ function selectTerm(key: number | string) {}
               Announcements
             </h3>
           </div>
-          <div class="md:t-columns-1">
+          <div
+            class="t-touch-pan-x t-snap-x t-w-max-[100vw] md:t-w-full t-flex t-flex-row md:t-flex-col t-columns-auto md:t-columns-1 t-overflow-x-scroll md:t-overflow-x-hidden"
+          >
             <template v-if="announcements.length !== 0">
               <AnnouncementCard
                 v-for="announcement in announcements"
@@ -217,7 +219,9 @@ function selectTerm(key: number | string) {}
               Deadlines
             </h3>
           </div>
-          <div class="md:t-columns-1">
+          <div
+            class="t-touch-pan-x t-snap-x t-w-max-[100vw] md:t-w-full t-flex t-flex-row md:t-flex-col t-columns-auto md:t-columns-1 t-overflow-x-scroll md:t-overflow-x-hidden"
+          >
             <template v-if="deadlines.length !== 0">
               <DeadlineCard
                 v-for="deadline in deadlines"
