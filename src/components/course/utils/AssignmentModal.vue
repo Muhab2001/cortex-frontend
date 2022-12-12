@@ -97,9 +97,9 @@
         <NCheckboxGroup v-model:value="modelRef.sections">
           <NCheckbox
             v-for="section in courseSections"
-            :key="section"
-            :label="section.toString()"
-            :value="section"
+            :key="section.id"
+            :label="section.section_number.toString()"
+            :value="section.id"
           ></NCheckbox>
         </NCheckboxGroup>
       </NFormItem>
@@ -362,7 +362,7 @@ const messenger = useMessage();
 const loading = useLoadingBar();
 const courseInfo = inject(CourseMeta);
 // TODO: replace with an api call
-const courseSections = ref<number[]>([]);
+const courseSections = ref<{ id: number; section_number: number }[]>([]);
 // form state
 const currentUploadId = ref<number>(0);
 const formRef = ref<FormInst | null>(null);
@@ -533,8 +533,7 @@ function submitForm() {
             });
             for (const section of modelRef.sections) {
               const newId = (
-                await AxiosInstance.post("assignments/", {
-                  sectionId: section,
+                await AxiosInstance.post("assignments/" + section, {
                   title: modelRef.title,
                   description: modelRef.description,
                   isSubmittable: +modelRef.isSubmittable,
@@ -574,7 +573,7 @@ function submitForm() {
               })
             ).data;
             // updating the path to submit the files
-            currentUploadId.value = newId;
+            currentUploadId.value = props.targetItem!.id;
             messenger.success("Successful Assignment Update!");
 
             loading.finish();
@@ -612,10 +611,7 @@ const customRequest = async ({
   const formData = new FormData();
   try {
     if (file) formData.append("files", file.file as File);
-    await AxiosInstance.patch(
-      `assignments/upload/` + currentUploadId.value,
-      formData
-    );
+    await AxiosInstance.patch(`assignments/` + currentUploadId.value, formData);
   } catch (e) {
     messenger.error("File Upload Failed");
   }

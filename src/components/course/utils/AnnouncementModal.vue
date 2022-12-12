@@ -93,9 +93,9 @@
           <NCheckboxGroup v-model:value="modelRef.sectionIds">
             <NCheckbox
               v-for="section in courseSections"
-              :key="section"
-              :label="section.toString()"
-              :value="section"
+              :key="section.id"
+              :label="section.section_number.toString()"
+              :value="section.id"
             ></NCheckbox>
           </NCheckboxGroup>
         </NFormItem>
@@ -180,7 +180,7 @@ const messenger = useMessage();
 const loading = useLoadingBar();
 
 // TODO: replace with an api call
-const courseSections = ref<number[]>([]);
+const courseSections = ref<{ id: number; section_number: number }[]>([]);
 
 const rules: Ref<FormRules> = computed(() => ({
   subject: {

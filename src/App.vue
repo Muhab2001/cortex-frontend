@@ -81,7 +81,7 @@ const route = useRoute();
           <span class="t-inline-flex t-w-fit t-ml-1">
             <!-- the cortex logo -->
             <img
-              class="t-w-16 t-mr-4"
+              class="t-w-10 t-mr-4"
               src="@/assets/logo_only_pure.svg"
               alt=""
             />

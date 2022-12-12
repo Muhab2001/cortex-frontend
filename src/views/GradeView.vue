@@ -210,7 +210,7 @@ function createColumns(): DataTableColumns<GradeRecord> {
           },
           {
             default: () =>
-              record.score === undefined
+              record.score === undefined || record.score === null
                 ? "-"
                 : h(
                     NTag,
