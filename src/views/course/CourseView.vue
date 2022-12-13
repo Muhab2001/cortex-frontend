@@ -106,7 +106,7 @@ import {
   reactive,
 } from "vue";
 import { useBreadCrumb } from "@/stores/breadcrump";
-import { NButtonGroup, NButton, NIcon } from "naive-ui";
+import { NButtonGroup, NButton, NIcon, NSelect } from "naive-ui";
 import { CoPresentRound } from "@vicons/material";
 import { AxiosInstance } from "@/axios";
 

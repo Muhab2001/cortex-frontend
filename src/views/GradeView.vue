@@ -23,6 +23,8 @@ import { CheckmarkCircle, Save } from "@vicons/ionicons5";
 import { useBreadCrumb } from "@/stores/breadcrump";
 import GradeModal from "@/components/course/utils/GradeModal.vue";
 import { AxiosInstance } from "@/axios";
+import VisibilityDropdown from "@/components/course/utils/VisibilityDropdown.vue";
+import GradesTab from "@/components/course/tabs/GradesTab.vue";
 interface GradePageProps {
   assignmentId: number;
   sectionId: number;
@@ -36,12 +38,14 @@ interface GradeRecord {
   studentId: number;
   studentUsername: string; //! This is the KFUPM id for students
   isSubmitted: boolean;
+  visible: number;
 }
 
 interface GradeInput {
   title: string;
   description?: string;
   courseFlag: string;
+  visible: boolean;
   fullScore: number;
   records: GradeRecord[];
 }
@@ -56,10 +60,19 @@ const grade = reactive<GradeInput>({
   title: "dfdfdf",
   description: "sdffsd",
   courseFlag: props.courseFlag,
-
+  visible: false,
   fullScore: 20,
   records: [],
 });
+
+const switchVisibility = async () => {
+  console.log("BEFORE", grade.visible);
+
+  await AxiosInstance.patch("grades/" + props.assignmentId, {
+    visible: !+grade.visible,
+  });
+  grade.visible = !grade.visible;
+};
 
 onBeforeMount(async () => {
   const { records, title, description, fullScore } = (
@@ -69,6 +82,9 @@ onBeforeMount(async () => {
   grade.title = title;
   grade.description = description;
   grade.fullScore = fullScore;
+  grade.visible = !grade.records.find(
+    (record: GradeRecord) => record.visible === 0
+  );
 });
 
 const breadcrumbs = useBreadCrumb();
@@ -294,13 +310,19 @@ function createColumns(): DataTableColumns<GradeRecord> {
       :max-score="gradeModalState.maxScore"
       :name="gradeModalState.studentName"
     />
-    <header class="t-mb-4">
-      <NText id="assignment-title" class="t-font-semibold">{{
-        grade.title
-      }}</NText>
-      <p class="t-text-gray-400 t-font-medium" v-if="grade.description">
-        {{ grade.description }}
-      </p>
+    <header class="t-mb-4 t-flex">
+      <span class="t-mr-4">
+        <NText id="assignment-title" class="t-font-semibold">{{
+          grade.title
+        }}</NText>
+        <p class="t-text-gray-400 t-font-medium" v-if="grade.description">
+          {{ grade.description }}
+        </p>
+      </span>
+      <VisibilityDropdown
+        :visible="grade.visible"
+        @single-toggle="switchVisibility"
+      />
     </header>
     <!-- <section
       class="t-fixed md:t-pb-0 m-4 t-z-10 t-bottom-0 t-left-0 t-w-full md:t-w-fit md:t-relative md:t-justify-end md:t-px-3"

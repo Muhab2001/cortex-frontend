@@ -38,11 +38,17 @@
         <NEllipsis class="t-text-lg" :line-clamp="1">{{
           courseMeta?.courseName
         }}</NEllipsis>
-        <div
-          class="t-text-lg t-font-medium t-text-blue-500"
-          name="attendance Date"
-        >
-          {{ new Date().toLocaleDateString() }}
+        <div class="t-mt-5 t-w-60">
+          <NSelect
+            name="attendance Date"
+            v-model:value="attendanceState.currentDate"
+            size="large"
+            @update:value="updateDate"
+            :options="attendanceState.allDates"
+            :filterable="false"
+            :render-label="renderLabel"
+          >
+          </NSelect>
         </div>
       </div>
     </div>
@@ -155,6 +161,8 @@
 import { AxiosInstance } from "@/axios";
 import { CourseMeta } from "@/injection_keys/courseView.keys";
 import {
+  Check24Filled,
+  Checkmark12Filled,
   EmojiSad16Filled,
   People24Filled,
   PersonAvailable24Filled,
@@ -171,8 +179,19 @@ import {
   NDivider,
   NTooltip,
   useDialog,
+  NSelect,
+  NEllipsis,
+  type SelectOption,
 } from "naive-ui";
-import { inject, reactive, watch, ref, computed } from "vue";
+import {
+  inject,
+  reactive,
+  watch,
+  ref,
+  computed,
+  h,
+  type VNodeChild,
+} from "vue";
 
 interface AttendanceModalProps {
   sectionId: number;
@@ -231,23 +250,80 @@ const currentIndex = ref<number>(0);
 const recordedCount = ref<number>(0);
 const attendanceState = reactive<{
   records: StudentRecord[];
+  allDates: { label: string; value: string }[];
+  currentDate: string;
 }>({
   records: [],
+  allDates: [],
+  currentDate: new Date().toLocaleDateString(),
 });
+
+const updateDate = async (value: string) => {
+  // attendanceState.currentDate = value;
+  attendanceState.records = (
+    await AxiosInstance.get("attendance/" + props.sectionId, {
+      params: {
+        date: new Date(value).toISOString(),
+      },
+    })
+  ).data.map((student: any) => {
+    console.log(student);
+    return {
+      id: student.student.id,
+      name: student.student.firstName + " " + student.student.lastName,
+      status: AttendanceStatus.UNSET,
+      username: student.student.username,
+    };
+  });
+};
 
 watch(
   () => props.visible,
   async () => {
-    attendanceState.records = (
-      await AxiosInstance.get("attendance/" + props.sectionId)
-    ).data.map((student: any) => ({
-      id: student.id,
-      name: student.firstName + " " + student.lastName,
-      status: AttendanceStatus.UNSET,
-      username: student.username,
-    }));
+    if (props.visible) {
+      const now = new Date().toLocaleDateString();
+      await updateDate(now);
+
+      const incomingDates = new Set(
+        (
+          await AxiosInstance.get(`attendance/${props.sectionId}/dates`)
+        ).data.map((record: any) => record.attendance_date)
+      );
+
+      incomingDates.add(now);
+
+      console.log(incomingDates);
+
+      attendanceState.allDates = Array.from(incomingDates).map(
+        (record: any) => ({
+          label: record as string,
+          value: record as string,
+        })
+      );
+
+      console.log(attendanceState.allDates);
+
+      attendanceState.currentDate = new Date().toLocaleDateString();
+    }
   }
 );
+
+const renderLabel = (option: SelectOption): VNodeChild => {
+  return [
+    h(
+      "div",
+      {
+        class: "t-w-full t-mr-8",
+        style: {
+          width: "1000px important",
+        },
+      },
+      {
+        default: () => [(option.label as string) + "                  "],
+      }
+    ),
+  ];
+};
 
 const recordsStyle = computed(() => {
   if (attendanceState.records.length !== 0) {
@@ -295,6 +371,7 @@ const submitAttendance = async () => {
     });
   } else {
     await AxiosInstance.patch("attendance/" + props.sectionId, {
+      date: new Date(attendanceState.currentDate).toISOString(),
       records: attendanceState.records.map((record) => ({
         id: record.id,
         index: record.status,
