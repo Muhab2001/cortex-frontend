@@ -310,8 +310,12 @@ function createColumns(): DataTableColumns<GradeRecord> {
       :max-score="gradeModalState.maxScore"
       :name="gradeModalState.studentName"
     />
-    <header class="t-mb-4 t-flex">
-      <span class="t-mr-4">
+    <header class="t-mb-4 t-flex t-items-center">
+      <VisibilityDropdown
+        :visible="grade.visible"
+        @single-toggle="switchVisibility"
+      />
+      <span class="t-ml-4">
         <NText id="assignment-title" class="t-font-semibold">{{
           grade.title
         }}</NText>
@@ -319,10 +323,6 @@ function createColumns(): DataTableColumns<GradeRecord> {
           {{ grade.description }}
         </p>
       </span>
-      <VisibilityDropdown
-        :visible="grade.visible"
-        @single-toggle="switchVisibility"
-      />
     </header>
     <!-- <section
       class="t-fixed md:t-pb-0 m-4 t-z-10 t-bottom-0 t-left-0 t-w-full md:t-w-fit md:t-relative md:t-justify-end md:t-px-3"
